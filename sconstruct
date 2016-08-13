@@ -1,0 +1,50 @@
+DEBUG = 'debug'
+RELEASE = 'release'
+DEFAULT_TARGET = DEBUG
+
+# Set our required libraries
+libraries = []
+library_paths = ''
+cxx = 'clang++'
+cpp_defines = {}
+cxx_flags = ['-std=c++14', '-Weverything', '-Wno-c++11-extensions',
+             '-Wno-c++98-compat', '-Wno-padded']
+debug_flags = ['-O0', '-g']
+release_flags = ['-O2']
+release_with_debug_info_flags = ['-O2', '-g']
+
+# define the attributes of the build environment shared between
+# both the debug and release builds
+common_env = Environment(CXX=cxx)
+common_env.Append(LIBS=libraries)
+common_env.Append(LIBPATH=library_paths)
+common_env.Append(CPPDEFINES=cpp_defines)
+common_env.Append(CXXFLAGS=cxx_flags)
+
+# our release build is derived from the common build environment...
+release_env = common_env.Clone()
+release_env.Append(CPPDEFINES=['RELEASE'])
+release_env.Append(CXXFLAGS=release_flags)
+release_env.VariantDir('build/release/src', 'src', duplicate=0)
+release_env.VariantDir('build/release/test', 'test', duplicate=0)
+
+# we define our debug build environment in a similar fashion...
+debug_env = common_env.Clone()
+debug_env.Append(CPPDEFINES=['DEBUG'])
+debug_env.Append(CXXFLAGS=debug_flags)
+debug_env.VariantDir('build/debug/src', 'src', duplicate=0)
+debug_env.VariantDir('build/debug/test', 'test', duplicate=0)
+
+target = ARGUMENTS.get('target', DEFAULT_TARGET)
+print('target: %s' % target)
+
+if target == DEBUG:
+    mode_dir = 'build/debug'
+    env = debug_env
+    env.SConscript('%s/src/sconscript' % mode_dir, {'env': env})
+    env.SConscript('%s/test/sconscript' % mode_dir, {'env': env})
+elif target == RELEASE:
+    mode_dir = 'build/release'
+    env = release_env
+    env.SConscript('%s/src/sconscript' % mode_dir, {'env': env})
+    env.SConscript('%s/test/sconscript' % mode_dir, {'env': env})

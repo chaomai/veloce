@@ -1,0 +1,35 @@
+import os
+
+Import('env')
+
+# copy parent environment so our alterations don't affect it
+env = env.Clone()
+
+# add src dirs to include path
+# initilize the set of targets to build
+bin_src = ['client', 'server']
+
+client_matches = []
+server_matches = []
+
+for root, dirnames, filenames in os.walk('.'):
+    for dirname in dirnames:
+        if not dirname in bin_src:
+            dir_path = os.path.join(root, dirname)
+            glob_str = '%s/*.c*' % dir_path
+            client_matches.append(Glob(glob_str))
+            server_matches.append(Glob(glob_str))
+
+
+print('adding src dir to path: .')
+env.Append(CPPPATH=['.'])
+client_matches.append(Glob('./client/*.c*'))
+server_matches.append(Glob('./server/*.c*'))
+
+# debug output
+print('src env CPPPATH:')
+print(env['CPPPATH'])
+
+# build a program that uses the source files as a shared library
+env.Program('../bin/client', client_matches)
+env.Program('../bin/server', server_matches)
