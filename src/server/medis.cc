@@ -12,15 +12,20 @@ using std::string;
 using std::vector;
 
 void Medis::handle(const string& in, string& out) {
-  Args args;
-  _parser.parse(&in);
+  // parser has members, cannot be shared among multiple threads.
+  // use it as local object.
+  Parser _parser(&in);
+  _parser.parse();
 
   switch (_parser._state) {
     case (Parser::State::OK): {
-      // size_t command_args_count = _parser._command_args_count;
-      // string command = std::move(_parser._command);
-      // vector<string> command_args = std::move(_parser._command_args);
-      out = _parser._command;
+      Args args;
+      args._command_args_count = _parser._command_args_count;
+      // avoid copy.
+      args._command = std::move(_parser._command);
+      args._command_args = std::move(_parser._command_args);
+
+      out = args._command;
       break;
     }
     case (Parser::State::ERROR): {

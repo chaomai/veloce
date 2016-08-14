@@ -4,8 +4,9 @@
 #include <cstdint>
 #include <string>
 
+#include "medis.h"
+
 #include "lib/tcp_socket.h"
-#include "server/medis.h"
 
 class BlockingServer {
  public:
@@ -20,6 +21,8 @@ class BlockingServer {
 
  private:
   TcpSocket _tcp_socket;
+
+  // _medis is shared among multiple threads.
   Medis _medis;
 };
 

@@ -21,9 +21,6 @@ class Medis {
   ~Medis() = default;
 
   void handle(const std::string& in, std::string& out);
-
- private:
-  Parser _parser;
 };
 
 #endif  // MEDIS_SERVER_MEDIS_H_

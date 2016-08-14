@@ -10,9 +10,8 @@ using std::pair;
 using std::string;
 using std::stoul;
 
-void Parser::parse(const string* in) {
+void Parser::parse() {
   try {
-    init(in);
     parse_command_args_count();
     _state = State::OK;
   } catch (ParserException& e) {

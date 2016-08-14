@@ -18,29 +18,19 @@ class Parser {
   State _state = State::ERROR;
   std::string _state_msg;
 
-  Parser() = default;
+  Parser(const std::string* in) : _in(in) {}
   Parser(const Parser& rhs) = delete;
   Parser(Parser&& rhs) = delete;
   Parser& operator=(const Parser& rhs) = delete;
   Parser& operator=(Parser&& rhs) = delete;
   ~Parser() = default;
 
-  void parse(const std::string* in);
+  void parse();
 
  private:
   const std::string* _in = nullptr;
+  // using at can ensure a valid postion.
   std::string::size_type _cur_pos = 0;
-
-  void init(const std::string* in) {
-    _command_args_count = 0;
-    _command.clear();
-    _command_args.clear();
-    _state = State::ERROR;
-    _state_msg.clear();
-
-    _in = in;
-    _cur_pos = 0;
-  }
 
   inline std::pair<std::string, std::string::size_type> get_next_str();
 

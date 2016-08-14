@@ -3,12 +3,12 @@ RELEASE = 'release'
 DEFAULT_TARGET = DEBUG
 
 # Set our required libraries
-libraries = []
+libraries = ['-lpthread']
 library_paths = ''
 cxx = 'clang++'
 cpp_defines = {}
 cxx_flags = ['-std=c++14', '-Weverything', '-Wno-c++11-extensions',
-             '-Wno-c++98-compat', '-Wno-padded']
+             '-Wno-c++98-compat', '-Wno-padded', '-pthread']
 debug_flags = ['-O0', '-g']
 release_flags = ['-O2']
 release_with_debug_info_flags = ['-O2', '-g']
