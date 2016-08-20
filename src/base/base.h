@@ -1,13 +1,31 @@
 #ifndef MEDIS_SERVER_BASE_H_
 #define MEDIS_SERVER_BASE_H_
 
+#include <cstddef>  // for size_t
 #include <string>
 #include <vector>
 
 struct Args {
-  size_t _command_args_count = 0;
+  std::size_t _command_args_count = 0;
   std::string _command;
   std::vector<std::string> _command_args;
+};
+
+enum ItemType {
+  MEDIS_INT,
+  MEDIS_DOUBLE,
+  MEDIS_DICT,
+  MEDIS_LIST,
+  MEDIS_STRING,
+  MEDIS_KDTREE,
+  MEDIS_ITEM
+};
+
+struct Item {
+  std::size_t _key_hash;
+  std::string _key;
+  ItemType _type;
+  void* _value_ptr;
 };
 
 constexpr int BUF_SIZE = 1024;

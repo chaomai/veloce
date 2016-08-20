@@ -1,8 +1,35 @@
+import contextlib
+import os
+import subprocess
+
+
+@contextlib.contextmanager
+def temp_chdir(path):
+    starting_directory = os.getcwd()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(starting_directory)
+
+# build required libraries
+googletest_build_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/build'
+googletest_include_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/include'
+
+try:
+    os.mkdir(googletest_build_dir)
+except OSError as e:
+    print('the %s directory is exist.' % googletest_build_dir)
+
+with temp_chdir(googletest_build_dir):
+    subprocess.call(['cmake', '..'])
+    subprocess.call(['make', '-j', '4'])
+
+# set our required libraries
 DEBUG = 'debug'
 RELEASE = 'release'
 DEFAULT_TARGET = DEBUG
 
-# Set our required libraries
 libraries = ['-lpthread']
 library_paths = ''
 cxx = 'clang++'
@@ -20,15 +47,16 @@ common_env.Append(LIBS=libraries)
 common_env.Append(LIBPATH=library_paths)
 common_env.Append(CPPDEFINES=cpp_defines)
 common_env.Append(CXXFLAGS=cxx_flags)
+common_env['ENV']['TERM'] = os.environ['TERM']
 
-# our release build is derived from the common build environment...
+# release build is derived from the common build environment...
 release_env = common_env.Clone()
 release_env.Append(CPPDEFINES=['RELEASE'])
 release_env.Append(CXXFLAGS=release_flags)
 release_env.VariantDir('build/release/src', 'src', duplicate=0)
 release_env.VariantDir('build/release/test', 'test', duplicate=0)
 
-# we define our debug build environment in a similar fashion...
+# define debug build environment in a similar fashion...
 debug_env = common_env.Clone()
 debug_env.Append(CPPDEFINES=['DEBUG'])
 debug_env.Append(CXXFLAGS=debug_flags)
@@ -42,9 +70,22 @@ if target == DEBUG:
     mode_dir = 'build/debug'
     env = debug_env
     env.SConscript('%s/src/sconscript' % mode_dir, {'env': env})
-    env.SConscript('%s/test/sconscript' % mode_dir, {'env': env})
+
+    test_debug_env = debug_env.Clone()
+    test_debug_env.Append(CPPPATH=googletest_include_dir)
+    test_debug_env.Append(LIBS='libgtest.a')
+    test_debug_env.Append(LIBPATH=googletest_build_dir)
+
+    env.SConscript('%s/test/sconscript' % mode_dir, {'env': test_debug_env})
+
 elif target == RELEASE:
     mode_dir = 'build/release'
     env = release_env
     env.SConscript('%s/src/sconscript' % mode_dir, {'env': env})
+
+    test_release_env = debug_env.Clone()
+    test_release_env.Append(CPPPATH=googletest_include_dir)
+    test_release_env.Append(LIBS='libgtest.a')
+    test_release_env.Append(LIBPATH=googletest_build_dir)
+
     env.SConscript('%s/test/sconscript' % mode_dir, {'env': env})

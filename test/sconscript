@@ -37,4 +37,4 @@ print('test env CPPPATH:')
 print(env['CPPPATH'])
 
 # build a program that uses the source files as a shared library
-env.Program('../bin/test', matches)
+env.Program('../bin/test_main', matches)

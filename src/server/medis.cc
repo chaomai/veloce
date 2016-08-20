@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "base/base.h"
-#include "server/parser.h"
+#include "parser.h"
 
 using std::string;
 using std::vector;

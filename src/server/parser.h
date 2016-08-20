@@ -12,7 +12,7 @@ class Parser {
  public:
   enum class State { OK, ERROR };
 
-  size_t _command_args_count = 0;
+  std::size_t _command_args_count = 0;
   std::string _command;
   std::vector<std::string> _command_args;
   State _state = State::ERROR;
@@ -34,7 +34,7 @@ class Parser {
 
   inline std::pair<std::string, std::string::size_type> get_next_str();
 
-  inline size_t get_next_size_t();
+  inline std::size_t get_next_size_t();
   inline std::string get_next_arg(std::string::size_type arg_len);
 
   inline void parse_command_args_count();
