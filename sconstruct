@@ -2,6 +2,13 @@ import contextlib
 import os
 import subprocess
 
+# common variables
+googletest_build_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/build'
+googletest_include_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/include'
+doxygen_dir = 'build/doxygen'
+
+# helper functions
+
 
 @contextlib.contextmanager
 def temp_chdir(path):
@@ -13,8 +20,6 @@ def temp_chdir(path):
         os.chdir(starting_directory)
 
 # build required libraries
-googletest_build_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/build'
-googletest_include_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/include'
 
 try:
     os.mkdir(googletest_build_dir)
@@ -24,6 +29,10 @@ except OSError as e:
 with temp_chdir(googletest_build_dir):
     subprocess.call(['cmake', '..'])
     subprocess.call(['make', '-j', '4'])
+
+# generate doc
+
+subprocess.call(['doxygen', 'Doxyfile'])
 
 # set our required libraries
 DEBUG = 'debug'
@@ -89,3 +98,12 @@ elif target == RELEASE:
     test_release_env.Append(LIBPATH=googletest_build_dir)
 
     env.SConscript('%s/test/sconscript' % mode_dir, {'env': env})
+
+# clean
+
+if env.GetOption('clean'):
+    # clean for google test lib
+    subprocess.call(['rm', '-rf', googletest_build_dir])
+
+    # clean for doxygen html
+    subprocess.call(['rm', '-rf', doxygen_dir])
