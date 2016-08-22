@@ -27,7 +27,7 @@ class TcpSocket {
   int _sockfd = -1;
   sockaddr_in _addr;
 
-  bool is_sockfd_valid() { return _sockfd != -1; }
+  bool is_sockfd_valid() const { return _sockfd != -1; }
   inline int get_sockfd();
 };
 

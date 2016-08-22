@@ -7,9 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "parser.h"
-
 #include "base/base.h"
+#include "parser.h"
 
 class Medis {
  public:

@@ -15,6 +15,7 @@ while True:
     client.send(data.encode())
     data = client.recv(BUF_SIZE)
     #  print(data.decode('utf-8'))
+    break
 
     if count % 10000 == 0:
         print(count)

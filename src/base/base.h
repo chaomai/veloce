@@ -1,7 +1,10 @@
-#ifndef MEDIS_SERVER_BASE_H_
-#define MEDIS_SERVER_BASE_H_
+#ifndef MEDIS_BASE_BASE_H_
+#define MEDIS_BASE_BASE_H_
 
+#include <cerrno>   // for errno
 #include <cstddef>  // for size_t
+#include <cstdio>   // for sprintf
+#include <cstring>  // for strerror
 #include <string>
 #include <vector>
 
@@ -39,6 +42,10 @@ constexpr const char MSG_NULL_TAG = '\0';
 constexpr const char MSG_SIGLE_TAG = '*';
 constexpr const char MSG_BATCH_TAG = '$';
 
-constexpr const char* FMT_STR = "%s";
+inline std::string get_errno_str(int errnum = errno) {
+  char err_str[BUF_SIZE] = {};
+  sprintf(err_str, "%s", strerror(errnum));
+  return std::string(err_str);
+}
 
-#endif  // MEDIS_SERVER_BASE_H_
+#endif  // MEDIS_BASE_BASE_H_

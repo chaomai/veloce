@@ -4,9 +4,8 @@
 #include <cstdint>
 #include <string>
 
-#include "medis.h"
-
 #include "lib/tcp_socket.h"
+#include "medis.h"
 
 class BlockingServer {
  public:

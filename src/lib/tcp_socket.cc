@@ -1,17 +1,14 @@
 #include "tcp_socket.h"
 
 #include <arpa/inet.h>   // for htons, inet_addr
-#include <errno.h>       // for errno
 #include <sys/socket.h>  // for socket
 #include <unistd.h>      // for cloese
 
 #include <cstdint>
-#include <cstring>
 #include <string>
 
-#include "socket_exception.h"
-
 #include "base/base.h"
+#include "socket_exception.h"
 
 using std::string;
 
@@ -27,10 +24,8 @@ TcpSocket::TcpSocket(const string& addr, uint16_t port) {
   _addr.sin_port = htons(port);
 }
 
-TcpSocket::TcpSocket(TcpSocket&& rhs) noexcept {
-  _sockfd = rhs._sockfd;
-  _addr = rhs._addr;
-
+TcpSocket::TcpSocket(TcpSocket&& rhs) noexcept : _sockfd(rhs._sockfd),
+                                                 _addr(rhs._addr) {
   rhs._sockfd = -1;
   rhs._addr = {};
 }
@@ -103,11 +98,9 @@ ssize_t TcpSocket::recv(string& out, int flags) {
   ssize_t recv_sz =
       ::recv(get_sockfd(), reinterpret_cast<void*>(tmp), BUF_SIZE, flags);
 
-  // todo: handle Connection reset by peer
   if (recv_sz == -1) {
-    char err_str[BUF_SIZE] = {};
-    sprintf(err_str, "receive through socket error, %s", strerror(errno));
-    throw SocketException(err_str);
+    throw SocketException(
+        (string("receive through socket error: ") + get_errno_str()).c_str());
   }
 
   string tmp_str(tmp);

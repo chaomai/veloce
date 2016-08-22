@@ -8,7 +8,6 @@
 class SocketException : public std::exception {
  public:
   explicit SocketException(const std::string& s) : _s(std::move(s)) {}
-
   const char* what() const noexcept;
 
  private:

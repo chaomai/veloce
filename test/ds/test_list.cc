@@ -5,4 +5,4 @@
 
 using std::string;
 
-TEST(list_test, test_creation) { List<string> l; }
+TEST(list_test, default_constructor) { List<string> l; }
