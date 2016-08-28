@@ -5,6 +5,8 @@
 #include <functional>
 #include <memory>
 
+#include "lib/mutex.h"
+
 /**
  * @brief thread safe list, using pthread mutex and fine-grained synchronization
  * to ensure thread safe.
@@ -21,9 +23,9 @@ class List final {
   using iterator = Iterator;
 
   List();
-  List(const List& rhs);
+  List(const List& rhs) = delete;
   List(List&& rhs) = delete;
-  List operator=(const List& rhs);
+  List operator=(const List& rhs) = delete;
   List operator=(List& rhs) = delete;
   ~List();
 

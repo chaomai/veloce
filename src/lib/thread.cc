@@ -2,17 +2,20 @@
 
 #include <unistd.h>  // for sysconf
 
+#include <memory>
+
 #include "thread_exception.h"
 
 Thread::Thread() : _thread_id(0), _joinable(false) {}
 
-Thread::Thread(Thread&& rhs)
-    : _thread_id(rhs._thread_id), _attr(rhs._attr), _joinable(rhs._joinable) {
+Thread::Thread(Thread&& rhs) noexcept : _thread_id(rhs._thread_id),
+                                        _attr(rhs._attr),
+                                        _joinable(rhs._joinable) {
   rhs._thread_id = 0;
   rhs._joinable = false;
 }
 
-Thread& Thread::operator=(Thread&& rhs) {
+Thread& Thread::operator=(Thread&& rhs) noexcept {
   if (this != &rhs) {
     _thread_id = rhs._thread_id;
     _attr = rhs._attr;

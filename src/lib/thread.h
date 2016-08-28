@@ -3,6 +3,8 @@
 
 #include <pthread.h>
 
+#include <memory>
+
 #include "base/action.h"
 #include "base/base.h"
 #include "thread_exception.h"
@@ -32,9 +34,9 @@ class Thread {
   explicit Thread(Function&& f, Args&&... args);
 
   Thread(const Thread& rhs) = delete;
-  Thread(Thread&& rhs);
+  Thread(Thread&& rhs) noexcept;
   Thread& operator=(const Thread& rhs) = delete;
-  Thread& operator=(Thread&& rhs);
+  Thread& operator=(Thread&& rhs) noexcept;
   ~Thread() = default;
 
   bool joinable() const { return _joinable; }
@@ -47,7 +49,7 @@ class Thread {
 
  private:
   pthread_t _thread_id;
-  pthread_attr_t _attr;
+  std::shared_ptr<pthread_attr_t> _attr;
   id _id;
   bool _joinable;
 };
@@ -62,13 +64,14 @@ void* start_routine(void* arg) {
 
 template <typename Function, typename... Args>
 Thread::Thread(Function&& f, Args&&... args) : _joinable(false) {
-  pthread_attr_init(&_attr);
+  _attr = std::make_shared<pthread_attr_t>();
+  pthread_attr_init(_attr.get());
 
   auto action =
       make_action(std::forward<Function>(f), std::forward<Args>(args)...);
-  int ret =
-      pthread_create(&_thread_id, &_attr, &start_routine<Function, Args...>,
-                     reinterpret_cast<void*>(&action));
+  int ret = pthread_create(&_thread_id, _attr.get(),
+                           &start_routine<Function, Args...>,
+                           reinterpret_cast<void*>(&action));
 
   if (ret) {
     throw ThreadException(get_errno_str(ret).c_str());

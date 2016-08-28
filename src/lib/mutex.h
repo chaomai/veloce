@@ -12,7 +12,7 @@ class Mutex {
   Mutex(Mutex&& rhs) = delete;
   Mutex& operator=(const Mutex& rhs) = delete;
   Mutex& operator=(Mutex&& rhs) = delete;
-  ~Mutex() = default;
+  ~Mutex();
 
   void lock();
   bool try_lock();
