@@ -4,6 +4,7 @@
 #include <iostream>
 
 constexpr int thread_count = 4;
+constexpr int iteration_count = 100000;
 
 class Copyable {
  public:
@@ -33,7 +34,7 @@ class UnCopyable {
     }
     return *this;
   }
-  ~UnCopyable() = default;
+  ~UnCopyable() { std::cout << "deconstructor" << std::endl; }
 
   int get_id() const { return _id; }
 

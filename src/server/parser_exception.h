@@ -8,8 +8,12 @@
 class ParserException : public std::exception {
  public:
   explicit ParserException(const std::string& s) : _s(std::move(s)) {}
-
   const char* what() const noexcept;
+  ParserException(const ParserException& rhs) = default;
+  ParserException(ParserException&& rhs) = default;
+  ParserException& operator=(const ParserException& rhs) = default;
+  ParserException& operator=(ParserException&& rhs) = default;
+  ~ParserException() = default;
 
  private:
   std::string _s;
