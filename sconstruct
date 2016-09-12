@@ -43,7 +43,7 @@ libraries = ['-lpthread']
 library_paths = ''
 cxx = 'clang++'
 cpp_defines = {}
-cxx_flags = ['-std=c++1z', '-Weverything', '-Wno-c++11-extensions',
+cxx_flags = ['-std=c++14', '-Weverything', '-Wno-c++11-extensions',
              '-Wno-c++98-compat', '-Wno-padded', '-pthread']
 debug_flags = ['-O0', '-g']
 release_flags = ['-O2']
