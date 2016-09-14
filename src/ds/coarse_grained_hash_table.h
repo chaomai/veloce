@@ -56,7 +56,7 @@ class CoarseGrainedHashTable {
   using hasher = Hash;
   using key_equal = KeyEqual;
 
-  CoarseGrainedHashTable(size_type slots_size = 1);
+  CoarseGrainedHashTable(size_type slots_size = 16777216);
   CoarseGrainedHashTable(std::initializer_list<value_type> init);
   CoarseGrainedHashTable(const CoarseGrainedHashTable &rhs) = delete;
   CoarseGrainedHashTable(CoarseGrainedHashTable &&rhs) = delete;
@@ -73,22 +73,15 @@ class CoarseGrainedHashTable {
   mapped_type_optional find(const Key &key);
 
   inline float load_factor() const;
-  inline float max_load_factor() const;
-  inline void max_load_factor(float ml);
-  void rehash(size_type count);
-  void reserve(size_type count);
 
  private:
   inline size_type get_slot_num(const Key &key);
   void insert_impl(hash_table_slot *slots, const Key &key, const T &value);
-  void release_impl(hash_table_slot *slots);
 
   hash_table_slot *_slots;
-  shared_mutex _table_mutex;
 
   atomic_size_t _slots_size;
   atomic_size_t _elements_count;
-  atomic_float _max_load_factor;
 
   hasher _hash_func;
   key_equal _key_eq_func;
@@ -100,11 +93,9 @@ class CoarseGrainedHashTable {
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::CoarseGrainedHashTable(
     size_type slots_size)
-    : _slots(new hash_table_slot[slots_size]),
-      _slots_size(slots_size),
-      _elements_count(0),
-      _max_load_factor(1.0),
-      _hash_func(Hash()) {}
+    : _slots_size(slots_size), _elements_count(0), _hash_func(Hash()) {
+  _slots = new hash_table_slot[slots_size];
+}
 
 /**
  * @brief Construct a hash table with a initializer list
@@ -120,7 +111,7 @@ CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::CoarseGrainedHashTable(
 
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::~CoarseGrainedHashTable() {
-  release_impl(_slots);
+  delete[] _slots;
 }
 
 template <typename Key, typename T, typename Hash, typename KeyEqual>
@@ -141,13 +132,6 @@ CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::size() const {
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert(const Key &key,
                                                             const T &value) {
-  shared_lock lock(_table_mutex);
-
-  if (load_factor() >= _max_load_factor.load()) {
-    lock.unlock();
-    rehash(2 * _slots_size);
-  }
-
   insert_impl(_slots, key, value);
 }
 
@@ -158,7 +142,6 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert(const Key &key,
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::erase(const Key &key) {
   size_type slot_num = get_slot_num(key);
-  shared_lock lock(_table_mutex);
 
   hash_table_slot &slot = _slots[slot_num];
   unique_lock slot_lock(slot._slot_mutex);
@@ -171,15 +154,12 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::erase(const Key &key) {
     --slot._slot_size;
     --_elements_count;
   }
-
-  slot_lock.unlock();
 }
 
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 typename CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::mapped_type_optional
 CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::find(const Key &key) {
   size_type slot_num = get_slot_num(key);
-  shared_lock lock(_table_mutex);
 
   hash_table_slot &slot = _slots[slot_num];
   shared_lock slot_lock(slot._slot_mutex);
@@ -201,80 +181,6 @@ CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::find(const Key &key) {
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 float CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::load_factor() const {
   return static_cast<float>(_elements_count) / _slots_size;
-}
-
-/**
- * @brief Get max load factor
- * @return max load factor
- */
-template <typename Key, typename T, typename Hash, typename KeyEqual>
-float CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::max_load_factor() const {
-  return _max_load_factor;
-}
-
-/**
- * @brief Set max load factor
- */
-template <typename Key, typename T, typename Hash, typename KeyEqual>
-void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::max_load_factor(float ml) {
-  _max_load_factor = ml;
-}
-
-/**
- * @brief Set the number of buckets to count and then rehash
- * @param count bucket size
- */
-template <typename Key, typename T, typename Hash, typename KeyEqual>
-void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::rehash(size_type count) {
-  unique_lock lock(_table_mutex);
-
-  // check again, just in case other thread already did rehash
-  if (load_factor() < _max_load_factor.load()) {
-    return;
-  }
-
-  if (_elements_count / count > _max_load_factor) {
-    count = static_cast<size_type>(_elements_count / _max_load_factor);
-  }
-
-  size_type old_slots_size = _slots_size.load();
-  _slots_size = count;
-  _elements_count = 0;
-
-  hash_table_slot *new_slots = new hash_table_slot[count];
-
-  for (size_type i = 0; i < old_slots_size; ++i) {
-    for (const value_type &val : _slots[i]._chain) {
-      insert_impl(new_slots, val.first, val.second);
-    }
-  }
-
-  release_impl(_slots);
-  _slots = new_slots;
-}
-
-/**
- * @brief Reserve
- * @param count bucket size
- */
-template <typename Key, typename T, typename Hash, typename KeyEqual>
-void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::reserve(size_type count) {
-  unique_lock lock(_table_mutex);
-
-  size_type old_slots_size = _slots_size.load();
-  _slots_size = count;
-  _elements_count = 0;
-
-  hash_table_slot *new_slots = new hash_table_slot[count];
-
-  for (size_type i = 0; i < old_slots_size; ++i) {
-    for (const value_type &val : _slots[i]._chain) {
-      insert_impl(new_slots, val.first, val.second);
-    }
-  }
-
-  release_impl(_slots);
-  _slots = new_slots;
 }
 
 /**
@@ -307,14 +213,6 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert_impl(
   } else {
     iter->second = value;
   }
-
-  slot_lock.unlock();
-}
-
-template <typename Key, typename T, typename Hash, typename KeyEqual>
-void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::release_impl(
-    hash_table_slot *slots) {
-  delete[] slots;
 }
 }
 

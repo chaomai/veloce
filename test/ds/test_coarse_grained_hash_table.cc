@@ -49,6 +49,8 @@ TEST(CoarseGrainedHashTable, single_thread_insert) {
 
   ASSERT_EQ(thread_count * iteration_count, hash_table.size());
 
+  Timer timer;
+
   for (int i = 0; i < thread_count * iteration_count; ++i) {
     auto ret = hash_table.find(i);
 
@@ -80,6 +82,8 @@ TEST(CoarseGrainedHashTable, multithread_insert) {
 
   vt.clear();
 
+  Timer timer;
+
   for (int i = 0; i < thread_count; ++i) {
     vt.push_back(thread([i, &hash_table]() {
       for (int j = 0; j < iteration_count; ++j) {
@@ -99,11 +103,8 @@ TEST(CoarseGrainedHashTable, multithread_insert) {
 }
 
 TEST(CoarseGrainedHashTable, erase) {
-  CoarseGrainedHashTable<string, string> hash_table;
-
-  hash_table.insert("key1", "value1");
-  hash_table.insert("key2", "value2");
-  hash_table.insert("key3", "value3");
+  CoarseGrainedHashTable<string, string> hash_table(
+      {{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}});
 
   hash_table.erase("key1");
   hash_table.erase("key2");
@@ -111,11 +112,8 @@ TEST(CoarseGrainedHashTable, erase) {
 }
 
 TEST(CoarseGrainedHashTable, find) {
-  CoarseGrainedHashTable<string, string> hash_table;
-
-  hash_table.insert("key1", "value1");
-  hash_table.insert("key2", "value2");
-  hash_table.insert("key3", "value3");
+  CoarseGrainedHashTable<string, string> hash_table(
+      {{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}});
 
   string ret = hash_table.find("key1").value();
   ASSERT_EQ("value1", ret);
@@ -126,5 +124,3 @@ TEST(CoarseGrainedHashTable, find) {
   ret = hash_table.find("key3").value();
   ASSERT_EQ("value3", ret);
 }
-
-TEST(CoarseGrainedHashTable, rehash) {}

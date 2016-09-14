@@ -1,10 +1,11 @@
 #ifndef MEDIS_TEST_COMMON_H_
 #define MEDIS_TEST_COMMON_H_
 
+#include <chrono>
 #include <iostream>
 
 constexpr int thread_count = 4;
-constexpr int iteration_count = 1000000;
+constexpr int iteration_count = 5000000;
 
 class Copyable {
  public:
@@ -40,6 +41,22 @@ class UnCopyable {
 
  private:
   int _id;
+};
+
+class Timer {
+ public:
+  Timer() { starting_time = std::chrono::high_resolution_clock::now(); }
+
+  ~Timer() {
+    std::cout << "duration: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     std::chrono::high_resolution_clock::now() - starting_time)
+                     .count()
+              << std::endl;
+  }
+
+ private:
+  std::chrono::high_resolution_clock::time_point starting_time;
 };
 
 #endif  // MEDIS_TEST_COMMON_H_
