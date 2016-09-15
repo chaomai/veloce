@@ -43,13 +43,14 @@ TEST(CoarseGrainedHashTable, basic_insert) {
 TEST(CoarseGrainedHashTable, single_thread_insert) {
   CoarseGrainedHashTable<int, int> hash_table;
 
+  Timer timer;
   for (int i = 0; i < thread_count * iteration_count; ++i) {
     hash_table.insert(i, i);
   }
 
-  ASSERT_EQ(thread_count * iteration_count, hash_table.size());
+  timer.print_passed("insertion");
 
-  Timer timer;
+  ASSERT_EQ(thread_count * iteration_count, hash_table.size());
 
   for (int i = 0; i < thread_count * iteration_count; ++i) {
     auto ret = hash_table.find(i);
@@ -57,11 +58,14 @@ TEST(CoarseGrainedHashTable, single_thread_insert) {
     ASSERT_TRUE(ret);
     ASSERT_EQ(i, ret.value());
   }
+
+  timer.print_passed("query");
 }
 
 TEST(CoarseGrainedHashTable, multithread_insert) {
   CoarseGrainedHashTable<int, int> hash_table;
 
+  Timer timer;
   vector<thread> vt;
 
   for (int i = 0; i < thread_count; ++i) {
@@ -78,11 +82,11 @@ TEST(CoarseGrainedHashTable, multithread_insert) {
     t.join();
   }
 
+  timer.print_passed("insertion");
+
   ASSERT_EQ(thread_count * iteration_count, hash_table.size());
 
   vt.clear();
-
-  Timer timer;
 
   for (int i = 0; i < thread_count; ++i) {
     vt.push_back(thread([i, &hash_table]() {
@@ -100,6 +104,8 @@ TEST(CoarseGrainedHashTable, multithread_insert) {
   for (auto& t : vt) {
     t.join();
   }
+
+  timer.print_passed("query");
 }
 
 TEST(CoarseGrainedHashTable, erase) {
@@ -123,4 +129,92 @@ TEST(CoarseGrainedHashTable, find) {
 
   ret = hash_table.find("key3").value();
   ASSERT_EQ("value3", ret);
+}
+
+TEST(CoarseGrainedHashTable, multithread_insert_erase) {
+  CoarseGrainedHashTable<int, int> hash_table;
+
+  Timer timer;
+  vector<thread> vt;
+
+  for (int i = 0; i < thread_count; ++i) {
+    vt.push_back(thread([i, &hash_table]() {
+      for (int j = 0; j < iteration_count; ++j) {
+        int key = i * iteration_count + j;
+        int value = i * iteration_count + j;
+        hash_table.insert(key, value);
+      }
+    }));
+  }
+
+  for (auto& t : vt) {
+    t.join();
+  }
+
+  timer.print_passed("insertion");
+
+  ASSERT_EQ(thread_count * iteration_count, hash_table.size());
+
+  vt.clear();
+
+  for (int i = 0; i < thread_count / 2; ++i) {
+    vt.push_back(thread([i, &hash_table]() {
+      for (int j = 0; j < iteration_count; ++j) {
+        int key = i * iteration_count + j;
+        hash_table.erase(key);
+      }
+    }));
+  }
+
+  for (int i = thread_count; i < thread_count + thread_count / 2; ++i) {
+    vt.push_back(thread([i, &hash_table]() {
+      for (int j = 0; j < iteration_count; ++j) {
+        int key = i * iteration_count + j;
+        int value = i * iteration_count + j;
+        hash_table.insert(key, value);
+      }
+    }));
+  }
+
+  for (auto& t : vt) {
+    t.join();
+  }
+
+  timer.print_passed("insertion and erasing");
+
+  ASSERT_EQ(thread_count * iteration_count, hash_table.size());
+
+  vt.clear();
+
+  for (int i = thread_count / 2; i < thread_count; ++i) {
+    vt.push_back(thread([i, &hash_table]() {
+      for (int j = 0; j < iteration_count; ++j) {
+        int key = i * iteration_count + j;
+        int value = i * iteration_count + j;
+
+        auto ret = hash_table.find(key);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(value, ret.value());
+      }
+    }));
+  }
+
+  for (int i = thread_count; i < thread_count + thread_count / 2; ++i) {
+    vt.push_back(thread([i, &hash_table]() {
+      for (int j = 0; j < iteration_count; ++j) {
+        int key = i * iteration_count + j;
+        int value = i * iteration_count + j;
+
+        auto ret = hash_table.find(key);
+        ASSERT_TRUE(ret);
+        ASSERT_EQ(value, ret.value());
+      }
+    }));
+  }
+
+  for (auto& t : vt) {
+    t.join();
+  }
+
+  timer.print_passed("query");
 }

@@ -56,7 +56,7 @@ class CoarseGrainedHashTable {
   using hasher = Hash;
   using key_equal = KeyEqual;
 
-  CoarseGrainedHashTable(size_type slots_size = 16777216);
+  CoarseGrainedHashTable(size_type slots_size = 4194304);
   CoarseGrainedHashTable(std::initializer_list<value_type> init);
   CoarseGrainedHashTable(const CoarseGrainedHashTable &rhs) = delete;
   CoarseGrainedHashTable(CoarseGrainedHashTable &&rhs) = delete;
@@ -156,6 +156,10 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::erase(const Key &key) {
   }
 }
 
+/**
+ * @brief find value of key, return the copy of value
+ * @param key Key to find
+ */
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 typename CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::mapped_type_optional
 CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::find(const Key &key) {

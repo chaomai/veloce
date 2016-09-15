@@ -1,5 +1,5 @@
-#ifndef MEDIS_SRC_BLOCKING_SERVER_H_
-#define MEDIS_SRC_BLOCKING_SERVER_H_
+#ifndef MEDIS_SERVER_BLOCKING_SERVER_H_
+#define MEDIS_SERVER_BLOCKING_SERVER_H_
 
 #include <cstdint>
 #include <string>
@@ -25,4 +25,4 @@ class BlockingServer {
   Medis _medis;
 };
 
-#endif  // MEDIS_SRC_BLOCKING_SERVER_H_
+#endif  // MEDIS_SERVER_BLOCKING_SERVER_H_

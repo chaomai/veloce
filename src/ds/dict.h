@@ -1,13 +1,41 @@
 #ifndef MEDIS_DS_DICT_H_
 #define MEDIS_DS_DICT_H_
 
+#include <functional>  // for hash
+#include <string>
+
 #include "base/base.h"
-#include "hash_table.h"
+#include "ds/coarse_grained_hash_table.h"
+
+namespace ds {
 
 class Dict {
+  using key_type = std::string;
+  using hasher = std::hash<key_type>;
+  using key_equal = std::equal_to<key_type>;
+  using hash_table =
+      ds::CoarseGrainedHashTable<key_type, Item*, hasher, key_equal>;
+  using size_type = std::size_t;
+
  public:
-  Dict();
-  ~Dict();
+  Dict() = default;
+  Dict(const Dict& rhs) = delete;
+  Dict(Dict&& rhs) = delete;
+  Dict& operator=(const Dict& rhs) = delete;
+  Dict& operator=(Dict&& rhs) = delete;
+  ~Dict() = default;
+
+  inline bool exists(const key_type& key);
+  inline size_type size() const;
+
+  void set(const key_type& key, Item* item);
+  // todo: unsafe here, if one thread is reading and another one is removing
+  Item* get(const key_type& key);
+  void remove(const key_type& key);
+
+ private:
+  hash_table _hash_table;
 };
+}
 
 #endif  // MEDIS_DS_DICT_H_

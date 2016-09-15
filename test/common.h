@@ -3,9 +3,10 @@
 
 #include <chrono>
 #include <iostream>
+#include <string>
 
 constexpr int thread_count = 4;
-constexpr int iteration_count = 5000000;
+constexpr int iteration_count = 4000000;
 
 class Copyable {
  public:
@@ -45,18 +46,34 @@ class UnCopyable {
 
 class Timer {
  public:
-  Timer() { starting_time = std::chrono::high_resolution_clock::now(); }
-
+  Timer()
+      : start_time(std::chrono::high_resolution_clock::now()),
+        last_time(start_time) {}
   ~Timer() {
-    std::cout << "duration: "
+    std::cout << "total: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(
-                     std::chrono::high_resolution_clock::now() - starting_time)
+                     std::chrono::high_resolution_clock::now() - start_time)
                      .count()
-              << std::endl;
+              << " ms" << std::endl;
+  }
+
+  void print_passed(const std::string& msg = "") {
+    if (msg.size() > 0) {
+      std::cout << msg << ", ";
+    }
+
+    auto now = std::chrono::high_resolution_clock::now();
+    std::cout << "passed: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     now - last_time)
+                     .count()
+              << " ms" << std::endl;
+    last_time = now;
   }
 
  private:
-  std::chrono::high_resolution_clock::time_point starting_time;
+  std::chrono::high_resolution_clock::time_point start_time;
+  std::chrono::high_resolution_clock::time_point last_time;
 };
 
 #endif  // MEDIS_TEST_COMMON_H_

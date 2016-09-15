@@ -25,8 +25,6 @@ enum ItemType {
 };
 
 struct Item {
-  std::size_t _key_hash;
-  std::string _key;
   ItemType _type;
   void* _value_ptr;
 };
