@@ -11,6 +11,4 @@ int main(int argc, const char *argv[]) {
 
   BlockingServer blocking_server(addr, port);
   blocking_server.serve();
-
-  return 0;
 }

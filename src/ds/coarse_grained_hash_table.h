@@ -19,6 +19,8 @@ namespace impl {
  */
 template <typename T>
 struct Slot {
+  using iterator = typename List<T>::iterator;
+
   Slot();
   Slot(const Slot &rhs) = delete;
   Slot(Slot &&rhs) = delete;
@@ -47,6 +49,8 @@ class CoarseGrainedHashTable {
   using atomic_float = std::atomic<float>;
   using mapped_type_optional = std::experimental::optional<T>;
   using hash_table_slot = Slot<std::pair<const Key, T>>;
+  using hash_table_slot_iterator =
+      typename Slot<std::pair<const Key, T>>::iterator;
 
  public:
   using key_type = Key;
@@ -64,6 +68,8 @@ class CoarseGrainedHashTable {
   CoarseGrainedHashTable &operator=(CoarseGrainedHashTable &&rhs) = delete;
   ~CoarseGrainedHashTable();
 
+  mapped_type &operator[](const key_type &key);
+
   bool empty() const;
   size_type size() const;
 
@@ -76,6 +82,8 @@ class CoarseGrainedHashTable {
 
  private:
   inline size_type get_slot_num(const Key &key);
+  std::pair<hash_table_slot_iterator, hash_table_slot &> find_impl(
+      const Key &key);
   void insert_impl(hash_table_slot *slots, const Key &key, const T &value);
 
   hash_table_slot *_slots;
@@ -112,6 +120,14 @@ CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::CoarseGrainedHashTable(
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::~CoarseGrainedHashTable() {
   delete[] _slots;
+}
+
+template <typename Key, typename T, typename Hash, typename KeyEqual>
+typename CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::mapped_type
+    &CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::operator[](
+        const key_type &key) {
+  auto ret = find_impl(key);
+  return (*ret.first).second;
 }
 
 template <typename Key, typename T, typename Hash, typename KeyEqual>
@@ -163,16 +179,10 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::erase(const Key &key) {
 template <typename Key, typename T, typename Hash, typename KeyEqual>
 typename CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::mapped_type_optional
 CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::find(const Key &key) {
-  size_type slot_num = get_slot_num(key);
+  auto ret = find_impl(key);
 
-  hash_table_slot &slot = _slots[slot_num];
-  shared_lock slot_lock(slot._slot_mutex);
-
-  auto iter = slot._chain.find(
-      [&key](const value_type &val) -> bool { return val.first == key; });
-
-  if (iter != slot._chain.end()) {
-    return mapped_type_optional((*iter).second);
+  if (ret.first != ret.second._chain.end()) {
+    return mapped_type_optional((*ret.first).second);
   }
 
   return mapped_type_optional();
@@ -197,6 +207,23 @@ typename CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::size_type
 CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::get_slot_num(const Key &key) {
   const size_type hash_value = _hash_func(key);
   return hash_value % _slots_size;
+}
+
+template <typename Key, typename T, typename Hash, typename KeyEqual>
+std::pair<
+    typename CoarseGrainedHashTable<Key, T, Hash,
+                                    KeyEqual>::hash_table_slot_iterator,
+    typename CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::hash_table_slot &>
+CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::find_impl(const Key &key) {
+  size_type slot_num = get_slot_num(key);
+
+  hash_table_slot &slot = _slots[slot_num];
+  shared_lock slot_lock(slot._slot_mutex);
+
+  return {slot._chain.find([&key](const value_type &val) -> bool {
+            return val.first == key;
+          }),
+          slot};
 }
 
 template <typename Key, typename T, typename Hash, typename KeyEqual>

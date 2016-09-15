@@ -16,7 +16,10 @@ class BlockingServer {
   BlockingServer &operator=(BlockingServer &&rhs) = delete;
   ~BlockingServer() = default;
 
-  void serve();
+  // serve won't return to caller,
+  // more specific, control flow will not return to the caller.
+  // http://stackoverflow.com/questions/10538291/what-is-the-point-of-noreturn
+  [[noreturn]] void serve();
 
  private:
   TcpSocket _tcp_socket;

@@ -25,17 +25,20 @@ class Dict {
   Dict& operator=(Dict&& rhs) = delete;
   ~Dict() = default;
 
-  inline bool exists(const key_type& key);
+  bool exists(const key_type& key);
   inline size_type size() const;
 
   void set(const key_type& key, Item* item);
-  // todo: unsafe here, if one thread is reading and another one is removing
+  // todo: unsafe here, if one thread is reading and another one is removing.
   Item* get(const key_type& key);
   void remove(const key_type& key);
 
  private:
   hash_table _hash_table;
 };
+
+// size is inline and public, so it must be defined in the header file.
+typename Dict::size_type Dict::size() const { return _hash_table.size(); }
 }
 
 #endif  // MEDIS_DS_DICT_H_

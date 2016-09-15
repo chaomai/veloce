@@ -30,6 +30,16 @@ TEST(CoarseGrainedHashTable, initializer_list_constructor) {
   ASSERT_EQ("value3", ret);
 }
 
+TEST(CoarseGrainedHashTable, subscript) {
+  CoarseGrainedHashTable<string, string> hash_table(
+      {{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}});
+
+  ASSERT_EQ(3, hash_table.size());
+  ASSERT_EQ("value1", hash_table["key1"]);
+  ASSERT_EQ("value2", hash_table["key2"]);
+  ASSERT_EQ("value3", hash_table["key3"]);
+}
+
 TEST(CoarseGrainedHashTable, basic_insert) {
   CoarseGrainedHashTable<string, string> hash_table;
 

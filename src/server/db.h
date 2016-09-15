@@ -8,36 +8,6 @@ class Db {
   Db();
   ~Db();
 
-  // string
-  // append
-  // bitcount
-  // decr
-  // decrby
-  // get
-  // getrange
-  // getset
-  // incr
-  // incrby
-  // incrbyfloat
-  // mget
-  // mset
-  // msetnx
-  // set
-  // setnx
-  // setrange
-  // strlen
-
-  // list
-  // llen
-  // lpop
-  // lpush
-  // lpushx
-  // lrem
-  // lset
-  // rpop
-  // rpush
-  // rpushx
-
  private:
   ds::Dict _dict;
 };

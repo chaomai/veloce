@@ -32,6 +32,8 @@ class Parser {
   // using at can ensure a valid postion.
   std::string::size_type _cur_pos = 0;
 
+  // inline functions are only used in Parser, so it's unnecessary to define
+  // them in the header file.
   inline std::pair<std::string, std::string::size_type> get_next_str();
 
   inline std::size_t get_next_size_t();
