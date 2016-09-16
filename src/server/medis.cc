@@ -23,8 +23,8 @@ void Medis::handle(const string& in, string& out) {
     case (Parser::State::OK): {
       Args args;
       args._command_args_count = _parser._command_args_count;
-      // avoid copy.
       args._command = std::move(_parser._command);
+      args._command_args = std::move(_parser._command_args);
 
       _handlers[args._command](args, out);
       break;
@@ -39,7 +39,11 @@ void Medis::handle(const string& in, string& out) {
 void Medis::init_handler() {
   // connection
   _handlers.insert("echo", [](const Args& args, string& out) {
-    out = args._command_args[0];
+    if (args._command_args_count != 1) {
+      out = MSG_ERR;
+    } else {
+      out = args._command_args[0];
+    }
   });
 
   _handlers.insert("ping", [](const Args& args, string& out) { out = "pong"; });

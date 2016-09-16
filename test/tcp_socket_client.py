@@ -11,13 +11,14 @@ count = 0
 while True:
     count += 1
 
-    data = input('>>>')
+    #  data = input('>>>')
     #  data = '*3\r\n$5\r\nlpush\r\n$7\r\nmy_list\r\n$2\r\n12\r\n'
     #  data = '*1\r\n$4\r\nping\r\n'
+    data = '*2\r\n$4\r\necho\r\n$8\r\nqewrasdf\r\n'
     client.send(data.encode())
     data = client.recv(BUF_SIZE)
-    #  print(data.decode('utf-8'))
-    #  break
+    print(data.decode('utf-8'))
+    break
 
     if count % 10000 == 0:
         print(count)

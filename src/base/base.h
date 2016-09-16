@@ -1,6 +1,8 @@
 #ifndef MEDIS_BASE_BASE_H_
 #define MEDIS_BASE_BASE_H_
 
+#include <algorithm>
+#include <cctype>   // for tolower
 #include <cerrno>   // for errno
 #include <cstddef>  // for size_t
 #include <cstdio>   // for sprintf
@@ -44,6 +46,10 @@ inline std::string get_errno_str(int errnum = errno) {
   char err_str[BUF_SIZE] = {};
   sprintf(err_str, "%s", strerror(errnum));
   return std::string(err_str);
+}
+
+inline void to_lower(std::string& str) {
+  std::transform(str.begin(), str.end(), str.begin(), tolower);
 }
 
 #endif  // MEDIS_BASE_BASE_H_

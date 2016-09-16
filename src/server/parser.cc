@@ -64,7 +64,7 @@ void Parser::parse_command_args_count() {
     throw ParserException(MSG_ERR);
   }
 
-  _command_args_count = get_next_size_t();
+  _command_args_count = get_next_size_t() - 1;
 
   parse_command();
 }
@@ -76,12 +76,13 @@ void Parser::parse_command() {
 
   auto str_len = get_next_size_t();
   _command = get_next_arg(str_len);
+  to_lower(_command);
 
   parse_args();
 }
 
 void Parser::parse_args() {
-  for (string::size_type i = 0; i < _command_args_count - 1; ++i) {
+  for (string::size_type i = 0; i < _command_args_count; ++i) {
     if (_in->at(_cur_pos++) != MSG_BATCH_TAG) {
       throw ParserException(MSG_ERR);
     }
