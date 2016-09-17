@@ -4,9 +4,12 @@
 
 A high performance key-value storage.
 
-## Motivation
+Now, the following commands are supported:
 
-> Talk is cheap. Show me the Code.
+* connection: echo, ping, select
+* string: set, setnx, get
+
+## Motivation
 
 This project is a practice about Linux programming (first step).
 

@@ -8,12 +8,17 @@
 
 #include "base/base.h"
 #include "client_info.h"
+#include "db.h"
 #include "parser.h"
 
+using std::size_t;
+using std::stoul;
 using std::string;
 using std::vector;
 
-Medis::Medis() : _handlers(100) { init_handler(); }
+Medis::Medis() : _dbs(new Db[DBS_SIZE]), _handlers(100) { init_handler(); }
+
+Medis::~Medis() { delete[] _dbs; }
 
 void Medis::handle(ClientInfo& client_info) {
   // parser has members, cannot be shared among multiple threads.
@@ -57,12 +62,48 @@ void Medis::init_handler() {
     client_info._out = "pong";
   });
 
+  _handlers.insert("select", [](const Args& args, ClientInfo& client_info) {
+    if (args._command_args_count != 1) {
+      client_info._out = MSG_ERR;
+    }
+
+    size_t db_num = stoul(args._command_args[0]);
+
+    if (db_num >= DBS_SIZE) {
+      client_info._out = MSG_ERR;
+    } else {
+      client_info._current_db_num = db_num;
+      client_info._out = MSG_OK;
+    }
+  });
+
   // string
-  // append
+  _handlers.insert("append",
+                   [this](const Args& args, ClientInfo& client_info) {});
   // bitcount
   // decr
-  // decrby
-  // get
+
+  _handlers.insert("get", [this](const Args& args, ClientInfo& client_info) {
+    if (args._command_args_count != 1) {
+      client_info._out = MSG_ERR;
+    }
+
+    Item* item = _dbs[client_info._current_db_num].get(args);
+
+    if (item != nullptr) {
+      switch (item->_type) {
+        case MEDIS_INT:
+        case MEDIS_DOUBLE:
+        case MEDIS_STRING: {
+          string* str = reinterpret_cast<string*>(item->_value_ptr);
+          client_info._out = *str;
+          break;
+        }
+      }
+    } else {
+      client_info._out = MSG_ERR;
+    }
+  });
   // getrange
   // getset
   // incr
@@ -71,9 +112,30 @@ void Medis::init_handler() {
   // mget
   // mset
   // msetnx
-  // set
-  _handlers.insert("set", [](const Args& args, ClientInfo& client_info) {});
-  // setnx
+
+  _handlers.insert("set", [this](const Args& args, ClientInfo& client_info) {
+    if (args._command_args_count != 2) {
+      client_info._out = MSG_ERR;
+    } else {
+      if (_dbs[client_info._current_db_num].set(args)) {
+        client_info._out = MSG_OK;
+      } else {
+        client_info._out = MSG_ERR;
+      }
+    }
+  });
+
+  _handlers.insert("setnx", [this](const Args& args, ClientInfo& client_info) {
+    if (args._command_args_count != 2) {
+      client_info._out = MSG_ERR;
+    } else {
+      if (_dbs[client_info._current_db_num].setnx(args)) {
+        client_info._out = MSG_OK;
+      } else {
+        client_info._out = MSG_ERR;
+      }
+    }
+  });
   // setrange
   // strlen
 

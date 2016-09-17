@@ -16,25 +16,18 @@ struct Args {
   std::vector<std::string> _command_args;
 };
 
-enum ItemType {
-  MEDIS_INT,
-  MEDIS_DOUBLE,
-  MEDIS_DICT,
-  MEDIS_LIST,
-  MEDIS_STRING,
-  MEDIS_KDTREE,
-  MEDIS_ITEM
-};
+enum ItemType { MEDIS_INT, MEDIS_DOUBLE, MEDIS_DICT, MEDIS_LIST, MEDIS_STRING };
 
 struct Item {
   ItemType _type;
   void* _value_ptr;
 };
 
-constexpr int BUF_SIZE = 1024;
+constexpr std::size_t DBS_SIZE = 3;
+constexpr std::size_t BUF_SIZE = 1024;
 
 constexpr const char* MSG_CRLF = "\r\n";
-constexpr const char* MSG = "+OK\r\n";
+constexpr const char* MSG_OK = "+OK\r\n";
 constexpr const char* MSG_ERR = "-ERROR\r\n";
 
 constexpr const char MSG_CR_TAG = '\r';
