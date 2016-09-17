@@ -40,6 +40,12 @@ TEST(CoarseGrainedHashTable, subscript) {
   ASSERT_EQ("value3", hash_table["key3"]);
 }
 
+TEST(CoarseGrainedHashTable, subscript_with_exception) {
+  CoarseGrainedHashTable<string, string> hash_table(
+      {{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}});
+  ASSERT_THROW(hash_table["key4"], out_of_range);
+}
+
 TEST(CoarseGrainedHashTable, basic_insert) {
   CoarseGrainedHashTable<string, string> hash_table;
 

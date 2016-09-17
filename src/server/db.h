@@ -5,8 +5,12 @@
 
 class Db {
  public:
-  Db();
-  ~Db();
+  Db() = default;
+  Db(const Db& rhs) = delete;
+  Db(Db&& rhs) = delete;
+  Db& operator=(const Db& rhs) = delete;
+  Db& operator=(Db&& rhs) = delete;
+  ~Db() = default;
 
  private:
   ds::Dict _dict;

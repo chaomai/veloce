@@ -1,22 +1,24 @@
 #include "medis.h"
 
 #include <cstddef>  // for size_t
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "base/base.h"
+#include "client_info.h"
 #include "parser.h"
 
 using std::string;
 using std::vector;
 
-Medis::Medis() { init_handler(); }
+Medis::Medis() : _handlers(100) { init_handler(); }
 
-void Medis::handle(const string& in, string& out) {
+void Medis::handle(ClientInfo& client_info) {
   // parser has members, cannot be shared among multiple threads.
   // use it as local object.
-  Parser _parser(&in);
+  Parser _parser(&client_info._in);
   _parser.parse();
 
   switch (_parser._state) {
@@ -26,11 +28,16 @@ void Medis::handle(const string& in, string& out) {
       args._command = std::move(_parser._command);
       args._command_args = std::move(_parser._command_args);
 
-      _handlers[args._command](args, out);
+      try {
+        _handlers[args._command](args, client_info);
+      } catch (std::out_of_range& e) {
+        client_info._out = MSG_ERR;
+      }
+
       break;
     }
     case (Parser::State::ERROR): {
-      out = _parser._state_msg;
+      client_info._out = _parser._state_msg;
       break;
     }
   }
@@ -38,15 +45,17 @@ void Medis::handle(const string& in, string& out) {
 
 void Medis::init_handler() {
   // connection
-  _handlers.insert("echo", [](const Args& args, string& out) {
+  _handlers.insert("echo", [](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      out = MSG_ERR;
+      client_info._out = MSG_ERR;
     } else {
-      out = args._command_args[0];
+      client_info._out = args._command_args[0];
     }
   });
 
-  _handlers.insert("ping", [](const Args& args, string& out) { out = "pong"; });
+  _handlers.insert("ping", [](const Args& args, ClientInfo& client_info) {
+    client_info._out = "pong";
+  });
 
   // string
   // append
@@ -63,6 +72,7 @@ void Medis::init_handler() {
   // mset
   // msetnx
   // set
+  _handlers.insert("set", [](const Args& args, ClientInfo& client_info) {});
   // setnx
   // setrange
   // strlen

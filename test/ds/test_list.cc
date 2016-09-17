@@ -252,21 +252,31 @@ TEST(List, pop_front) {
 TEST(List, massive_insert) {
   List<int> list;
 
-  for (int i = 0; i < iteration_count; ++i) {
+  for (int i = 0; i < iteration_count / 1000; ++i) {
     switch (i % 3) {
-      case 1: {
+      case 0: {
         list.insert(list.begin(), i);
         break;
       }
-      case 2: {
+
+      case 1: {
         list.push_back(i);
         break;
       }
-      case 3: {
+
+      case 2: {
         list.push_front(i);
         break;
       }
     }
+  }
+
+  ASSERT_EQ(iteration_count / 1000, list.size());
+
+  for (int i = 0; i < iteration_count / 1000; ++i) {
+    auto iter = list.find(i);
+    ASSERT_NE(list.end(), iter);
+    ASSERT_EQ(i, *iter);
   }
 }
 

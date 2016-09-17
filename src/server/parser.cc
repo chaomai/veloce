@@ -15,10 +15,10 @@ void Parser::parse() {
     parse_command_args_count();
     _state = State::OK;
   } catch (ParserException& e) {
-    _state_msg = string(e.what());
+    _state_msg = e.what();
     _state = State::ERROR;
   } catch (...) {
-    _state_msg = string(MSG_ERR);
+    _state_msg = MSG_ERR;
     _state = State::ERROR;
     return;
   }

@@ -7,6 +7,7 @@
 #include <functional>  // for hash
 #include <mutex>
 #include <shared_mutex>
+#include <stdexcept>
 #include <utility>
 
 #include "list.h"
@@ -60,7 +61,7 @@ class CoarseGrainedHashTable {
   using hasher = Hash;
   using key_equal = KeyEqual;
 
-  CoarseGrainedHashTable(size_type slots_size = 4194304);
+  CoarseGrainedHashTable(size_type slots_size = 2097152);
   CoarseGrainedHashTable(std::initializer_list<value_type> init);
   CoarseGrainedHashTable(const CoarseGrainedHashTable &rhs) = delete;
   CoarseGrainedHashTable(CoarseGrainedHashTable &&rhs) = delete;
@@ -127,6 +128,11 @@ typename CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::mapped_type
     &CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::operator[](
         const key_type &key) {
   auto ret = find_impl(key);
+
+  if (ret.first == ret.second._chain.end()) {
+    throw std::out_of_range("key doesn't exist.");
+  }
+
   return (*ret.first).second;
 }
 

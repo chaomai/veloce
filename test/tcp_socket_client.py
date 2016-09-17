@@ -2,25 +2,35 @@ import socket
 import time
 
 BUF_SIZE = 1024
-
 server_addr = ('127.0.0.1', 6789)
+
+MSG_SIGLE_TAG = '*'
+MSG_BATCH_TAG = '$'
+MSG_CRLF = '\r\n'
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(server_addr)
 
-count = 0
+
+def build_cmd(string):
+    args = [arg for arg in string.split(' ') if len(arg) > 0]
+    if len(args) > 0:
+        cmd = MSG_SIGLE_TAG + str(len(args)) + MSG_CRLF
+
+        for arg in args:
+            cmd += MSG_BATCH_TAG + str(len(arg)) + MSG_CRLF + arg + MSG_CRLF
+
+        return cmd
+
+    return ''
+
+
 while True:
-    count += 1
-
-    #  data = input('>>>')
-    #  data = '*3\r\n$5\r\nlpush\r\n$7\r\nmy_list\r\n$2\r\n12\r\n'
-    #  data = '*1\r\n$4\r\nping\r\n'
-    data = '*2\r\n$4\r\necho\r\n$8\r\nqewrasdf\r\n'
-    client.send(data.encode())
-    data = client.recv(BUF_SIZE)
-    print(data.decode('utf-8'))
-    break
-
-    if count % 10000 == 0:
-        print(count)
+    data = input('>>> ')
+    cmd = build_cmd(data)
+    if len(cmd) > 0:
+        client.send(cmd.encode())
+        data = client.recv(BUF_SIZE)
+        print(data.decode('utf-8'))
 
 client.close()

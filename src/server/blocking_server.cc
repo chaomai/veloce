@@ -5,6 +5,8 @@
 #include <thread>
 #include <utility>
 
+#include "client_info.h"
+
 using std::cout;
 using std::endl;
 using std::string;
@@ -18,23 +20,21 @@ void BlockingServer::serve() {
   _tcp_socket.listen();
 
   while (true) {
-    TcpSocket acc_sock = _tcp_socket.accept();
+    ClientInfo client_info(_tcp_socket.accept());
 
     thread t(
-        [this](TcpSocket sock) {
+        [this](ClientInfo info) {
           while (true) {
-            string buf;
-            auto recv_sz = sock.recv(buf);
+            auto recv_sz = info._client_sock.recv(info._in);
             if (recv_sz == 0) {
               break;
             }
 
-            string out;
-            _medis.handle(buf, out);
-            sock.send(out);
+            _medis.handle(info);
+            info._client_sock.send(info._out);
           }
         },
-        std::move(acc_sock));
+        std::move(client_info));
     t.detach();
   }
 }

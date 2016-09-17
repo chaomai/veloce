@@ -23,8 +23,8 @@ struct ListNode {
   ~ListNode() = default;
 
   T _value;
-  ListNode* _next;
-  ListNode* _prev;
+  ListNode* _next = nullptr;
+  ListNode* _prev = nullptr;
 };
 
 template <typename T>
@@ -143,8 +143,8 @@ T* ListIterator<T>::operator->() const {
 
 template <typename T>
 bool operator==(const ListIterator<T>& lhs, const ListIterator<T>& rhs) {
-  typename ListIterator<T>::node_ptr pos1 = lhs._node_ptr;
-  typename ListIterator<T>::node_ptr pos2 = rhs._node_ptr;
+  auto pos1 = lhs._node_ptr;
+  auto pos2 = rhs._node_ptr;
   return pos1 == pos2;
 }
 
