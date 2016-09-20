@@ -61,7 +61,7 @@ class CoarseGrainedHashTable {
   using hasher = Hash;
   using key_equal = KeyEqual;
 
-  CoarseGrainedHashTable(size_type slots_size = 2097152);
+  CoarseGrainedHashTable(size_type slots_size = 524288);
   CoarseGrainedHashTable(std::initializer_list<value_type> init);
   CoarseGrainedHashTable(const CoarseGrainedHashTable &rhs) = delete;
   CoarseGrainedHashTable(CoarseGrainedHashTable &&rhs) = delete;
@@ -74,8 +74,9 @@ class CoarseGrainedHashTable {
   bool empty() const;
   size_type size() const;
 
-  void insert(const Key &key, const T &value);
-  void erase(const Key &key);
+  bool insert(const Key &key, const T &value);
+  bool compare_and_set(const Key &key, const T &old_value, const T &new_value);
+  bool erase(const Key &key);
 
   mapped_type_optional find(const Key &key);
 
@@ -85,7 +86,7 @@ class CoarseGrainedHashTable {
   inline size_type get_slot_num(const Key &key);
   std::pair<hash_table_slot_iterator, hash_table_slot &> find_impl(
       const Key &key);
-  void insert_impl(hash_table_slot *slots, const Key &key, const T &value);
+  bool insert_impl(hash_table_slot *slots, const Key &key, const T &value);
 
   hash_table_slot *_slots;
 
@@ -148,13 +149,35 @@ CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::size() const {
 }
 
 /**
- * @brief Insert value into hash table. If value exists, then do update
+ * @brief Insert value into hash table. If value exists, then do nothing
  * @param value Value to insert
  */
 template <typename Key, typename T, typename Hash, typename KeyEqual>
-void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert(const Key &key,
+bool CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert(const Key &key,
                                                             const T &value) {
-  insert_impl(_slots, key, value);
+  return insert_impl(_slots, key, value);
+}
+
+/**
+ * @brief Compare and set. If key doesn't exists, the new_value will be
+ * inserted.
+ */
+template <typename Key, typename T, typename Hash, typename KeyEqual>
+bool CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::compare_and_set(
+    const Key &key, const T &old_value, const T &new_value) {
+  size_type slot_num = get_slot_num(key);
+  hash_table_slot &slot = _slots[slot_num];
+  unique_lock slot_lock(slot._slot_mutex);
+
+  auto iter = slot._chain.find(
+      [&key](const value_type &val) { return val.first == key; });
+
+  if (iter->second != old_value) {
+    return false;
+  }
+
+  iter->second = new_value;
+  return true;
 }
 
 /**
@@ -162,7 +185,7 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert(const Key &key,
  * @param key Key to remove
  */
 template <typename Key, typename T, typename Hash, typename KeyEqual>
-void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::erase(const Key &key) {
+bool CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::erase(const Key &key) {
   size_type slot_num = get_slot_num(key);
 
   hash_table_slot &slot = _slots[slot_num];
@@ -175,7 +198,10 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::erase(const Key &key) {
     slot._chain.erase(iter);
     --slot._slot_size;
     --_elements_count;
+
+    return true;
   }
+  return false;
 }
 
 /**
@@ -190,7 +216,6 @@ CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::find(const Key &key) {
   if (ret.first != ret.second._chain.end()) {
     return mapped_type_optional((*ret.first).second);
   }
-
   return mapped_type_optional();
 }
 
@@ -233,7 +258,7 @@ CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::find_impl(const Key &key) {
 }
 
 template <typename Key, typename T, typename Hash, typename KeyEqual>
-void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert_impl(
+bool CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert_impl(
     hash_table_slot *slots, const Key &key, const T &value) {
   size_type slot_num = get_slot_num(key);
   hash_table_slot &slot = slots[slot_num];
@@ -247,9 +272,10 @@ void CoarseGrainedHashTable<Key, T, Hash, KeyEqual>::insert_impl(
 
     ++slot._slot_size;
     ++_elements_count;
-  } else {
-    iter->second = value;
+
+    return true;
   }
+  return false;
 }
 }
 

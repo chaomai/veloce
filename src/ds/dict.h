@@ -28,10 +28,10 @@ class Dict {
   bool exists(const key_type& key);
   inline size_type size() const;
 
-  void set(const key_type& key, Item* item);
-  // todo: unsafe here, if one thread is reading and another one is removing.
+  bool set(const key_type& key, Item* item);
+  bool compare_and_set(const key_type& key, Item* old_item, Item* new_item);
   Item* get(const key_type& key);
-  void remove(const key_type& key);
+  bool remove(const key_type& key);
 
  private:
   hash_table _hash_table;

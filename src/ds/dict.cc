@@ -14,8 +14,13 @@ bool Dict::exists(const key_type& key) {
   return false;
 }
 
-void Dict::set(const key_type& key, Item* item) {
-  _hash_table.insert(key, item);
+bool Dict::set(const key_type& key, Item* item) {
+  return _hash_table.insert(key, item);
+}
+
+bool Dict::compare_and_set(const key_type& key, Item* old_item,
+                           Item* new_item) {
+  return _hash_table.compare_and_set(key, old_item, new_item);
 }
 
 Item* Dict::get(const key_type& key) {
@@ -28,5 +33,5 @@ Item* Dict::get(const key_type& key) {
   return nullptr;
 }
 
-void Dict::remove(const key_type& key) { _hash_table.erase(key); }
+bool Dict::remove(const key_type& key) { return _hash_table.erase(key); }
 }

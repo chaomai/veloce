@@ -32,6 +32,7 @@ void BlockingServer::serve() {
 
             _medis.handle(info);
             info._client_sock.send(info._out);
+            info._out.clear();
           }
         },
         std::move(client_info));

@@ -261,7 +261,6 @@ List<T>& List<T>::operator=(List&& rhs) noexcept {
     rhs._tail = nullptr;
     rhs._size = 0;
   }
-
   return *this;
 }
 
@@ -347,6 +346,7 @@ typename List<T>::iterator List<T>::insert(iterator pos, T&& value) {
  */
 template <typename T>
 typename List<T>::iterator List<T>::erase(iterator pos) {
+  // todo: erased node is not freed (to ensure thread safe right now)
   --_size;
 
   node_ptr next_node = pos._node_ptr->_next;
@@ -395,7 +395,6 @@ typename List<T>::iterator List<T>::find(const T& value) {
       return iter;
     }
   }
-
   return end();
 }
 
@@ -406,7 +405,6 @@ typename List<T>::iterator List<T>::find(std::function<bool(const T&)> p) {
       return iter;
     }
   }
-
   return end();
 }
 

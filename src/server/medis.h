@@ -31,6 +31,10 @@ class Medis {
 
  private:
   void init_handler();
+  void append_error(std::string& out, const std::string& err,
+                    const std::string& info = "");
+  void append_item(std::string& out, const Item* item);
+  void append_item(std::string& out, const std::string&& str);
 
   Db* _dbs;
   hash_table _handlers;

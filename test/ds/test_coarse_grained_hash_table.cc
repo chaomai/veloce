@@ -49,11 +49,33 @@ TEST(CoarseGrainedHashTable, subscript_with_exception) {
 TEST(CoarseGrainedHashTable, basic_insert) {
   CoarseGrainedHashTable<string, string> hash_table;
 
-  hash_table.insert("key1", "value1");
-  hash_table.insert("key2", "value2");
-  hash_table.insert("key3", "value3");
+  ASSERT_EQ(1, hash_table.insert("key1", "value1"));
+  ASSERT_EQ(1, hash_table.insert("key2", "value2"));
+  ASSERT_EQ(1, hash_table.insert("key3", "value3"));
 
   ASSERT_EQ(3, hash_table.size());
+}
+
+TEST(CoarseGrainedHashTable, dublicated_insert) {
+  CoarseGrainedHashTable<string, string> hash_table;
+
+  ASSERT_EQ(1, hash_table.insert("key1", "value1"));
+  ASSERT_EQ(1, hash_table.insert("key2", "value2"));
+  ASSERT_EQ(1, hash_table.insert("key3", "value3"));
+  ASSERT_EQ(0, hash_table.insert("key3", "value33"));
+
+  ASSERT_EQ(3, hash_table.size());
+  ASSERT_EQ("value1", hash_table["key1"]);
+  ASSERT_EQ("value2", hash_table["key2"]);
+  ASSERT_EQ("value3", hash_table["key3"]);
+}
+
+TEST(CoarseGrainedHashTable, compare_and_set) {
+  CoarseGrainedHashTable<string, string> hash_table(
+      {{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}});
+
+  ASSERT_EQ(1, hash_table.compare_and_set("key3", "value3", "value33"));
+  ASSERT_EQ("value33", hash_table["key3"]);
 }
 
 TEST(CoarseGrainedHashTable, single_thread_insert) {
@@ -128,9 +150,9 @@ TEST(CoarseGrainedHashTable, erase) {
   CoarseGrainedHashTable<string, string> hash_table(
       {{"key1", "value1"}, {"key2", "value2"}, {"key3", "value3"}});
 
-  hash_table.erase("key1");
-  hash_table.erase("key2");
-  hash_table.erase("key3");
+  ASSERT_EQ(1, hash_table.erase("key1"));
+  ASSERT_EQ(1, hash_table.erase("key2"));
+  ASSERT_EQ(1, hash_table.erase("key3"));
 }
 
 TEST(CoarseGrainedHashTable, find) {
