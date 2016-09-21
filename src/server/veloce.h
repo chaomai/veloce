@@ -1,5 +1,5 @@
-#ifndef MEDIS_SERVER_MEDIS_H_
-#define MEDIS_SERVER_MEDIS_H_
+#ifndef VELOCE_SERVER_VELOCE_H_
+#define VELOCE_SERVER_VELOCE_H_
 
 #include <cstddef>  // for size_t
 #include <functional>
@@ -11,7 +11,7 @@
 #include "ds/coarse_grained_hash_table.h"
 #include "parser.h"
 
-class Medis {
+class Veloce {
   using key_type = std::string;
   using hasher = std::hash<key_type>;
   using key_equal = std::equal_to<key_type>;
@@ -20,12 +20,12 @@ class Medis {
       ds::CoarseGrainedHashTable<key_type, handler, hasher, key_equal>;
 
  public:
-  Medis();
-  Medis(const Medis& rhs) = delete;
-  Medis(Medis&& rhs) = delete;
-  Medis& operator=(const Medis& rhs) = delete;
-  Medis& operator=(Medis&& rhs) = delete;
-  ~Medis();
+  Veloce();
+  Veloce(const Veloce& rhs) = delete;
+  Veloce(Veloce&& rhs) = delete;
+  Veloce& operator=(const Veloce& rhs) = delete;
+  Veloce& operator=(Veloce&& rhs) = delete;
+  ~Veloce();
 
   void handle(ClientInfo& clinet_info);
 
@@ -34,10 +34,10 @@ class Medis {
   void append_error(std::string& out, const std::string& err,
                     const std::string& info = "");
   void append_item(std::string& out, const Item* item);
-  void append_item(std::string& out, const std::string&& str);
+  void append_item(std::string& out, const std::string& str);
 
   Db* _dbs;
   hash_table _handlers;
 };
 
-#endif  // MEDIS_SERVER_MEDIS_H_
+#endif  // VELOCE_SERVER_VELOCE_H_

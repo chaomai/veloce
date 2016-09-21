@@ -24,11 +24,11 @@ TEST(Dict, basic_set_remove_get) {
   string string4("string4");
   string string5("string5");
 
-  Item item1{MEDIS_STRING, &string1};
-  Item item2{MEDIS_STRING, &string2};
-  Item item3{MEDIS_STRING, &string3};
-  Item item4{MEDIS_STRING, &string4};
-  Item item5{MEDIS_STRING, &string5};
+  Item item1{VELOCE_STRING, &string1};
+  Item item2{VELOCE_STRING, &string2};
+  Item item3{VELOCE_STRING, &string3};
+  Item item4{VELOCE_STRING, &string4};
+  Item item5{VELOCE_STRING, &string5};
 
   dict.set(key1, &item1);
   dict.set(key2, &item2);

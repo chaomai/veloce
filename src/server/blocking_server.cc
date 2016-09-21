@@ -30,7 +30,7 @@ void BlockingServer::serve() {
               break;
             }
 
-            _medis.handle(info);
+            _veloce.handle(info);
             info._client_sock.send(info._out);
             info._out.clear();
           }

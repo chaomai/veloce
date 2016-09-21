@@ -1,5 +1,5 @@
-#ifndef MEDIS_SERVER_DB_H_
-#define MEDIS_SERVER_DB_H_
+#ifndef VELOCE_SERVER_DB_H_
+#define VELOCE_SERVER_DB_H_
 
 #include <utility>
 
@@ -33,4 +33,4 @@ class Db {
   ds::Dict _dict;
 };
 
-#endif  // MEDIS_SERVER_DB_H_
+#endif  // VELOCE_SERVER_DB_H_

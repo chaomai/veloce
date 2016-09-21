@@ -1,5 +1,5 @@
-#ifndef MEDIS_SERVER_PARSER_EXCEPTION_H_
-#define MEDIS_SERVER_PARSER_EXCEPTION_H_
+#ifndef VELOCE_SERVER_PARSER_EXCEPTION_H_
+#define VELOCE_SERVER_PARSER_EXCEPTION_H_
 
 #include <exception>
 #include <string>
@@ -19,4 +19,4 @@ class ParserException : public std::exception {
   std::string _s;
 };
 
-#endif  // MEDIS_SERVER_PARSER_EXCEPTION_H_
+#endif  // VELOCE_SERVER_PARSER_EXCEPTION_H_

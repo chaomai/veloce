@@ -1,5 +1,5 @@
-#ifndef MEDIS_SERVER_CLIENT_INFO_H_
-#define MEDIS_SERVER_CLIENT_INFO_H_
+#ifndef VELOCE_SERVER_CLIENT_INFO_H_
+#define VELOCE_SERVER_CLIENT_INFO_H_
 
 #include <cstddef>  // for size_t
 #include <string>
@@ -20,4 +20,4 @@ struct ClientInfo {
   std::string _out;
 };
 
-#endif  // MEDIS_SERVER_CLIENT_INFO_H_
+#endif  // VELOCE_SERVER_CLIENT_INFO_H_

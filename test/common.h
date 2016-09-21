@@ -1,5 +1,5 @@
-#ifndef MEDIS_TEST_COMMON_H_
-#define MEDIS_TEST_COMMON_H_
+#ifndef VELOCE_TEST_COMMON_H_
+#define VELOCE_TEST_COMMON_H_
 
 #include <chrono>
 #include <iostream>
@@ -76,4 +76,4 @@ class Timer {
   std::chrono::high_resolution_clock::time_point last_time;
 };
 
-#endif  // MEDIS_TEST_COMMON_H_
+#endif  // VELOCE_TEST_COMMON_H_

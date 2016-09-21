@@ -1,5 +1,5 @@
-#ifndef MEDIS_LIB_SOCKET_EXCEPTION_H_
-#define MEDIS_LIB_SOCKET_EXCEPTION_H_
+#ifndef VELOCE_LIB_SOCKET_EXCEPTION_H_
+#define VELOCE_LIB_SOCKET_EXCEPTION_H_
 
 #include <exception>
 #include <string>
@@ -19,4 +19,4 @@ class SocketException : public std::exception {
   std::string _s;
 };
 
-#endif  // MEDIS_LIB_SOCKET_EXCEPTION_H_
+#endif  // VELOCE_LIB_SOCKET_EXCEPTION_H_

@@ -1,11 +1,11 @@
-#ifndef MEDIS_SERVER_BLOCKING_SERVER_H_
-#define MEDIS_SERVER_BLOCKING_SERVER_H_
+#ifndef VELOCE_SERVER_BLOCKING_SERVER_H_
+#define VELOCE_SERVER_BLOCKING_SERVER_H_
 
 #include <cstdint>
 #include <string>
 
 #include "lib/tcp_socket.h"
-#include "medis.h"
+#include "veloce.h"
 
 class BlockingServer {
  public:
@@ -24,8 +24,8 @@ class BlockingServer {
  private:
   TcpSocket _tcp_socket;
 
-  // _medis is shared among multiple threads.
-  Medis _medis;
+  // _veloce is shared among multiple threads.
+  Veloce _veloce;
 };
 
-#endif  // MEDIS_SERVER_BLOCKING_SERVER_H_
+#endif  // VELOCE_SERVER_BLOCKING_SERVER_H_

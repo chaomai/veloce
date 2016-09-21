@@ -1,5 +1,5 @@
-#ifndef MEDIS_DS_LIST_H_
-#define MEDIS_DS_LIST_H_
+#ifndef VELOCE_DS_LIST_H_
+#define VELOCE_DS_LIST_H_
 
 #include <cstddef>  // for size_t
 #include <functional>
@@ -454,4 +454,4 @@ template <typename T>
 using List = impl::List<T>;
 }
 
-#endif  // MEDIS_DS_LIST_H_
+#endif  // VELOCE_DS_LIST_H_

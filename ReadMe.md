@@ -1,6 +1,6 @@
-# Medis
+# Veloce
 
-## What's Medis?
+## What's Veloce?
 
 A high performance key-value storage.
 

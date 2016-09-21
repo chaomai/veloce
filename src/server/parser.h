@@ -1,5 +1,5 @@
-#ifndef MEDIS_SERVER_PARSER_H_
-#define MEDIS_SERVER_PARSER_H_
+#ifndef VELOCE_SERVER_PARSER_H_
+#define VELOCE_SERVER_PARSER_H_
 
 #include <cstddef>  // for size_t
 #include <string>
@@ -44,4 +44,4 @@ class Parser {
   inline void parse_args();
 };
 
-#endif  // MEDIS_SERVER_PARSER_H_
+#endif  // VELOCE_SERVER_PARSER_H_

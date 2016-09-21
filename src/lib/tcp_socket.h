@@ -1,5 +1,5 @@
-#ifndef MEDIS_LIB_TCP_SOCKET_H_
-#define MEDIS_LIB_TCP_SOCKET_H_
+#ifndef VELOCE_LIB_TCP_SOCKET_H_
+#define VELOCE_LIB_TCP_SOCKET_H_
 
 #include <netinet/in.h>  // for sockaddr_in
 #include <sys/socket.h>  // for socket
@@ -31,4 +31,4 @@ class TcpSocket {
   inline int get_sockfd();
 };
 
-#endif  // MEDIS_LIB_TCP_SOCKET_H_
+#endif  // VELOCE_LIB_TCP_SOCKET_H_

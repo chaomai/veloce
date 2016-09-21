@@ -1,4 +1,4 @@
-#include "medis.h"
+#include "veloce.h"
 
 #include <cstddef>  // for size_t
 #include <stdexcept>
@@ -17,11 +17,11 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-Medis::Medis() : _dbs(new Db[DBS_SIZE]), _handlers(100) { init_handler(); }
+Veloce::Veloce() : _dbs(new Db[DBS_SIZE]), _handlers(100) { init_handler(); }
 
-Medis::~Medis() { delete[] _dbs; }
+Veloce::~Veloce() { delete[] _dbs; }
 
-void Medis::handle(ClientInfo& client_info) {
+void Veloce::handle(ClientInfo& client_info) {
   // parser has members, cannot be shared among multiple threads.
   // use it as local object.
   Parser _parser(&client_info._in);
@@ -49,7 +49,7 @@ void Medis::handle(ClientInfo& client_info) {
   }
 }
 
-void Medis::init_handler() {
+void Veloce::init_handler() {
   /*
    * connection
    */
@@ -58,16 +58,19 @@ void Medis::init_handler() {
       append_error(client_info._out, MSG_ERR,
                    string_format(MSG_ERR_ARG_NUM, "echo"));
     } else {
-      client_info._out = args._command_args[0];
+      append_item(client_info._out, args._command_args[0]);
     }
   });
 
   _handlers.insert("ping", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count == 0) {
-      client_info._out.append(STATUS_REP_PREFIX);
-      client_info._out.append(MSG_PONG);
+      client_info._out += STATUS_REP_PREFIX;
+      client_info._out += MSG_PONG;
+    } else if (args._command_args_count == 1) {
+      append_item(client_info._out, args._command_args[0]);
     } else {
-      client_info._out = args._command_args[0];
+      append_error(client_info._out, MSG_ERR,
+                   string_format(MSG_ERR_ARG_NUM, "ping"));
     }
   });
 
@@ -82,7 +85,7 @@ void Medis::init_handler() {
         append_error(client_info._out, MSG_ERR);
       } else {
         client_info._current_db_num = db_num;
-        client_info._out = MSG_OK;
+        append_item(client_info._out, MSG_OK);
       }
     }
   });
@@ -239,18 +242,24 @@ void Medis::init_handler() {
   // rpushx
 }
 
-void Medis::append_error(string& out, const string& err, const string& info) {
-  out.append(ERROR_REP_PREFIX);
-  out.append(MSG_ERR);
+void Veloce::append_error(string& out, const string& err, const string& info) {
+  out += ERROR_REP_PREFIX;
+  out += MSG_ERR;
 
   if (info.size() > 0) {
-    out.append(MSG_SPACE);
-    out.append(info);
+    out += MSG_SPACE;
+    out += info;
   }
 
-  out.append(MSG_CRLF);
+  out += MSG_CRLF;
 }
 
-void Medis::append_item(std::string& out, const Item* item) {}
+void Veloce::append_item(std::string& out, const Item* item) {}
 
-void Medis::append_item(std::string& out, const std::string&& str) {}
+void Veloce::append_item(std::string& out, const std::string& str) {
+  out += MSG_BATCH_TAG;
+  out += to_string(str.size());
+  out += MSG_CRLF;
+  out += str;
+  out += MSG_CRLF;
+}

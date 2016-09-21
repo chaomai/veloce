@@ -1,5 +1,5 @@
-#ifndef MEDIS_DS_COARSE_GRAINED_HASH_TABLE_H_
-#define MEDIS_DS_COARSE_GRAINED_HASH_TABLE_H_
+#ifndef VELOCE_DS_COARSE_GRAINED_HASH_TABLE_H_
+#define VELOCE_DS_COARSE_GRAINED_HASH_TABLE_H_
 
 #include <atomic>
 #include <cstddef>  // for size_t
@@ -285,4 +285,4 @@ using CoarseGrainedHashTable =
     impl::CoarseGrainedHashTable<Key, T, Hash, KeyEqual>;
 }
 
-#endif  // MEDIS_DS_COARSE_GRAINED_HASH_TABLE_H_
+#endif  // VELOCE_DS_COARSE_GRAINED_HASH_TABLE_H_

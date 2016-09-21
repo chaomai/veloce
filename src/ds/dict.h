@@ -1,5 +1,5 @@
-#ifndef MEDIS_DS_DICT_H_
-#define MEDIS_DS_DICT_H_
+#ifndef VELOCE_DS_DICT_H_
+#define VELOCE_DS_DICT_H_
 
 #include <functional>  // for hash
 #include <string>
@@ -41,4 +41,4 @@ class Dict {
 typename Dict::size_type Dict::size() const { return _hash_table.size(); }
 }
 
-#endif  // MEDIS_DS_DICT_H_
+#endif  // VELOCE_DS_DICT_H_

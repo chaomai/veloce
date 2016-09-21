@@ -51,7 +51,7 @@ pair<int, Db::State> Db::append(const Args& args) {
       string* str = reinterpret_cast<string*>(old_item->_value_ptr);
       string* value = new string(*str + args._command_args[1]);
 
-      Item* new_item = new Item({MEDIS_STRING, value});
+      Item* new_item = new Item({VELOCE_STRING, value});
 
       if (_dict.compare_and_set(key, old_item, new_item)) {
         return {value->size(), State::OK};
@@ -59,7 +59,7 @@ pair<int, Db::State> Db::append(const Args& args) {
     } else {
       const string& key = args._command_args[0];
       string* value = new string(args._command_args[1]);
-      Item* new_item = new Item({MEDIS_STRING, value});
+      Item* new_item = new Item({VELOCE_STRING, value});
 
       if (_dict.set(key, new_item)) {
         return {value->size(), State::OK};
@@ -74,9 +74,9 @@ pair<Item*, Db::State> Db::get(const Args& args) {
 
   if (item != nullptr) {
     switch (item->_type) {
-      case MEDIS_INT:
-      case MEDIS_DOUBLE:
-      case MEDIS_STRING: {
+      case VELOCE_INT:
+      case VELOCE_DOUBLE:
+      case VELOCE_STRING: {
         return {item, State::OK};
       }
 
@@ -99,7 +99,7 @@ pair<Item*, Db::State> Db::getset(const Args& args) {
 
     const string& key = args._command_args[0];
     string* value = new string(args._command_args[1]);
-    Item* new_item = new Item({MEDIS_STRING, value});
+    Item* new_item = new Item({VELOCE_STRING, value});
 
     // if key doesn't exist.
     if (old_item == nullptr && _dict.set(key, new_item)) {
@@ -114,16 +114,16 @@ pair<Item*, Db::State> Db::getset(const Args& args) {
 }
 
 pair<int, Db::State> Db::set(const Args& args) {
-  const string& key = args._command_args[0];
-  string* value = new string(args._command_args[1]);
-  Item* new_item = new Item({MEDIS_STRING, value});
-
-  if (_dict.set(key, new_item)) {
-    return {1, State::OK};
-  }
-
-  // key is already taken, get key first and check the type.
   while (true) {
+    const string& key = args._command_args[0];
+    string* value = new string(args._command_args[1]);
+    Item* new_item = new Item({VELOCE_STRING, value});
+
+    if (_dict.set(key, new_item)) {
+      return {1, State::OK};
+    }
+
+    // key is already taken, get key first and check the type.
     auto old_pair = get(args);
 
     if (old_pair.second == State::TYPE_ERROR) {
@@ -153,7 +153,7 @@ pair<int, Db::State> Db::setnx(const Args& args) {
   Item* old_item = old_pair.first;
   const string& key = args._command_args[0];
   string* value = new string(args._command_args[1]);
-  Item* new_item = new Item({MEDIS_STRING, value});
+  Item* new_item = new Item({VELOCE_STRING, value});
 
   if (_dict.compare_and_set(key, old_item, new_item)) {
     return {1, State::OK};

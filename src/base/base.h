@@ -1,5 +1,5 @@
-#ifndef MEDIS_BASE_BASE_H_
-#define MEDIS_BASE_BASE_H_
+#ifndef VELOCE_BASE_BASE_H_
+#define VELOCE_BASE_BASE_H_
 
 #include <algorithm>
 #include <cctype>   // for tolower
@@ -17,7 +17,7 @@ struct Args {
   std::vector<std::string> _command_args;
 };
 
-enum ItemType { MEDIS_INT, MEDIS_DOUBLE, MEDIS_DICT, MEDIS_LIST, MEDIS_STRING };
+enum ItemType { VELOCE_INT, VELOCE_DOUBLE, VELOCE_DICT, VELOCE_LIST, VELOCE_STRING };
 
 struct Item {
   ItemType _type;
@@ -71,4 +71,4 @@ inline std::string string_format(const std::string& fmt, Args... args) {
   return std::string(buf.get(), buf.get() + size - 1);
 }
 
-#endif  // MEDIS_BASE_BASE_H_
+#endif  // VELOCE_BASE_BASE_H_
