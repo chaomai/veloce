@@ -31,10 +31,12 @@ class Veloce {
 
  private:
   void init_handler();
-  void append_error(std::string& out, const std::string& err,
-                    const std::string& info = "");
-  void append_item(std::string& out, const Item* item);
-  void append_item(std::string& out, const std::string& str);
+  void build_status_reply(std::string& out, const std::string& str);
+  void build_error_reply(std::string& out, const std::string& err,
+                         const std::string& info = "");
+  void build_integer_reply(std::string& out, int val);
+  void build_bulk_reply(std::string& out, const std::string& str);
+  void build_reply(std::string& out, const Item* item);
 
   Db* _dbs;
   hash_table _handlers;

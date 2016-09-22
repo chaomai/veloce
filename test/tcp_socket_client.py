@@ -2,8 +2,8 @@ import socket
 import time
 
 BUF_SIZE = 1024
-server_addr = ('127.0.0.1', 6789)
-#  server_addr = ('127.0.0.1', 6379)
+#  server_addr = ('127.0.0.1', 6789)
+server_addr = ('127.0.0.1', 6379)
 
 MSG_SIGLE_TAG = '*'
 MSG_BATCH_TAG = '$'

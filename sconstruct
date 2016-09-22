@@ -3,8 +3,8 @@ import os
 import subprocess
 
 # common variables
-googletest_build_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/build'
-googletest_include_dir = '/home/chaomai/Documents/Codes/Current/GitHub/medis/third_party/googletest/googletest/include'
+googletest_build_dir = '/home/chaomai/Documents/Codes/Current/GitHub/veloce/third_party/googletest/googletest/build'
+googletest_include_dir = '/home/chaomai/Documents/Codes/Current/GitHub/veloce/third_party/googletest/googletest/include'
 doxygen_dir = 'build/doxygen'
 
 # helper functions

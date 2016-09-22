@@ -37,13 +37,13 @@ void Veloce::handle(ClientInfo& client_info) {
       try {
         _handlers[args._command](args, client_info);
       } catch (std::out_of_range& e) {
-        append_error(client_info._out, MSG_ERR);
+        build_error_reply(client_info._out, MSG_ERR);
       }
 
       break;
     }
     case (Parser::State::ERROR): {
-      append_error(client_info._out, MSG_ERR, _parser._state_msg);
+      build_error_reply(client_info._out, MSG_ERR, _parser._state_msg);
       break;
     }
   }
@@ -55,37 +55,36 @@ void Veloce::init_handler() {
    */
   _handlers.insert("echo", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      append_error(client_info._out, MSG_ERR,
-                   string_format(MSG_ERR_ARG_NUM, "echo"));
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "echo"));
     } else {
-      append_item(client_info._out, args._command_args[0]);
+      build_bulk_reply(client_info._out, args._command_args[0]);
     }
   });
 
   _handlers.insert("ping", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count == 0) {
-      client_info._out += STATUS_REP_PREFIX;
-      client_info._out += MSG_PONG;
+      build_status_reply(client_info._out, MSG_PONG);
     } else if (args._command_args_count == 1) {
-      append_item(client_info._out, args._command_args[0]);
+      build_bulk_reply(client_info._out, args._command_args[0]);
     } else {
-      append_error(client_info._out, MSG_ERR,
-                   string_format(MSG_ERR_ARG_NUM, "ping"));
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "ping"));
     }
   });
 
   _handlers.insert("select", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      append_error(client_info._out, MSG_ERR,
-                   string_format(MSG_ERR_ARG_NUM, "select"));
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "select"));
     } else {
       size_t db_num = stoul(args._command_args[0]);
 
       if (db_num >= DBS_SIZE) {
-        append_error(client_info._out, MSG_ERR);
+        build_error_reply(client_info._out, MSG_ERR);
       } else {
         client_info._current_db_num = db_num;
-        append_item(client_info._out, MSG_OK);
+        build_status_reply(client_info._out, MSG_OK);
       }
     }
   });
@@ -95,27 +94,24 @@ void Veloce::init_handler() {
    */
   _handlers.insert("del", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count < 1) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].del(args);
 
       if (ret_pair.second == Db::State::OK) {
-        client_info._out = to_string(ret_pair.first);
+        build_integer_reply(client_info._out, ret_pair.first);
       }
     }
   });
 
   _handlers.insert("exists", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].exists(args);
 
-      if (ret_pair.second == Db::State::OK) {
-        client_info._out = to_string(ret_pair.first);
-      } else {
-        // client_info._out = MSG_NIL;
-      }
+      // state is always OK
+      build_integer_reply(client_info._out, ret_pair.first);
     }
   });
 
@@ -124,14 +120,14 @@ void Veloce::init_handler() {
    */
   _handlers.insert("append", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].append(args);
 
       if (ret_pair.second == Db::State::OK) {
-        client_info._out = to_string(ret_pair.first);
+        build_integer_reply(client_info._out, ret_pair.first);
       } else {
-        append_error(client_info._out, MSG_ERR);
+        build_error_reply(client_info._out, MSG_ERR);
       }
     }
   });
@@ -141,7 +137,7 @@ void Veloce::init_handler() {
 
   _handlers.insert("get", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].get(args);
 
@@ -150,12 +146,12 @@ void Veloce::init_handler() {
 
         if (item != nullptr) {
           string* str = reinterpret_cast<string*>(item->_value_ptr);
-          client_info._out = *str;
+          build_bulk_reply(client_info._out, *str);
         } else {
-          // client_info._out = MSG_NIL;
+          build_bulk_reply(client_info._out, "");
         }
       } else {
-        append_error(client_info._out, MSG_ERR);
+        build_error_reply(client_info._out, MSG_ERR);
       }
     }
   });
@@ -164,7 +160,7 @@ void Veloce::init_handler() {
 
   _handlers.insert("getset", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].getset(args);
 
@@ -173,15 +169,14 @@ void Veloce::init_handler() {
 
         if (item != nullptr) {
           string* str = reinterpret_cast<string*>(item->_value_ptr);
-          client_info._out = *str;
+          build_bulk_reply(client_info._out, *str);
         } else {
-          // client_info._out = MSG_NIL;
+          build_bulk_reply(client_info._out, "");
         }
       } else {
-        append_error(client_info._out, MSG_ERR);
+        build_error_reply(client_info._out, MSG_ERR);
       }
     }
-
   });
 
   // incr
@@ -193,28 +188,28 @@ void Veloce::init_handler() {
 
   _handlers.insert("set", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].set(args);
 
       if (ret_pair.second == Db::State::OK) {
-        client_info._out = to_string(ret_pair.first);
+        build_status_reply(client_info._out, MSG_OK);
       } else {
-        append_error(client_info._out, MSG_ERR);
+        build_error_reply(client_info._out, MSG_ERR);
       }
     }
   });
 
   _handlers.insert("setnx", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].setnx(args);
 
       if (ret_pair.second == Db::State::OK) {
-        client_info._out = to_string(ret_pair.first);
+        build_integer_reply(client_info._out, ret_pair.first);
       } else {
-        append_error(client_info._out, MSG_ERR);
+        build_error_reply(client_info._out, MSG_ERR);
       }
     }
   });
@@ -223,8 +218,15 @@ void Veloce::init_handler() {
 
   _handlers.insert("strlen", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      append_error(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR);
     } else {
+      auto ret_pair = _dbs[client_info._current_db_num].strlen(args);
+
+      if (ret_pair.second == Db::State::OK) {
+        build_integer_reply(client_info._out, ret_pair.first);
+      } else {
+        build_error_reply(client_info._out, MSG_ERR);
+      }
     }
   });
 
@@ -242,7 +244,14 @@ void Veloce::init_handler() {
   // rpushx
 }
 
-void Veloce::append_error(string& out, const string& err, const string& info) {
+void Veloce::build_status_reply(std::string& out, const std::string& str) {
+  out += STATUS_REP_PREFIX;
+  out += str;
+  out += MSG_CRLF;
+}
+
+void Veloce::build_error_reply(string& out, const string& err,
+                               const string& info) {
   out += ERROR_REP_PREFIX;
   out += MSG_ERR;
 
@@ -254,12 +263,22 @@ void Veloce::append_error(string& out, const string& err, const string& info) {
   out += MSG_CRLF;
 }
 
-void Veloce::append_item(std::string& out, const Item* item) {}
-
-void Veloce::append_item(std::string& out, const std::string& str) {
-  out += MSG_BATCH_TAG;
-  out += to_string(str.size());
+void Veloce::build_integer_reply(std::string& out, int val) {
+  out += INTEGER_REP_PREFIX;
+  out += to_string(val);
   out += MSG_CRLF;
-  out += str;
+}
+
+void Veloce::build_bulk_reply(std::string& out, const std::string& str) {
+  out += MSG_BATCH_TAG;
+
+  if (str.size() == 0) {
+    out += "-1";
+  } else {
+    out += to_string(str.size());
+    out += MSG_CRLF;
+    out += str;
+  }
+
   out += MSG_CRLF;
 }

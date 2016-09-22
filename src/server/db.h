@@ -17,17 +17,26 @@ class Db {
   Db& operator=(Db&& rhs) = delete;
   ~Db() = default;
 
-  // keys
+  /*
+   * keys
+   */
   std::pair<int, State> del(const Args& args);
   std::pair<bool, State> exists(const Args& args);
 
-  // strings
+  /*
+   * strings
+   */
   std::pair<int, State> append(const Args& args);
   std::pair<Item*, State> get(const Args& args);
   std::pair<Item*, State> getset(const Args& args);
   std::pair<int, State> set(const Args& args);
   std::pair<int, State> setnx(const Args& args);
   std::pair<int, State> strlen(const Args& args);
+
+  /*
+   * list
+   */
+  std::pair<int, State> llen(const Args& args);
 
  private:
   ds::Dict _dict;
