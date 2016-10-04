@@ -177,24 +177,6 @@ pair<int, Db::State> Db::strlen(const Args& args) {
 /*
  * list
  */
-std::pair<int, Db::State> Db::llen(const Args& args) {}
-
-std::pair<Item*, Db::State> Db::lpop(const Args& args) {}
-
-std::pair<int, Db::State> Db::lpush(const Args& args) {
-  Item* item = get_raw(args);
-
-  if (check_type(item, {VELOCE_LIST}) != State::OK) {
-    return {0, State::TYPE_ERROR};
-  }
-
-  const string& key = args._command_args[0];
-
-  if (item == nullptr) {
-    List<Item*>* value = new List<Item*>;
-    item = new Item({VELOCE_LIST, value});
-  }
-}
 
 Item* Db::get_raw(const Args& args) {
   const string& key = args._command_args[0];

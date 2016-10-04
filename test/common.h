@@ -6,7 +6,7 @@
 #include <string>
 
 constexpr int thread_count = 4;
-constexpr int iteration_count = 4000000;
+constexpr int iteration_count = 500000;
 
 class Copyable {
  public:
