@@ -3,11 +3,26 @@ import os
 import subprocess
 
 # common variables
-googletest_build_dir = '/home/chaomai/Documents/Codes/Current/GitHub/veloce/third_party/googletest/googletest/build'
-googletest_include_dir = '/home/chaomai/Documents/Codes/Current/GitHub/veloce/third_party/googletest/googletest/include'
+DEBUG = 'debug'
+RELEASE = 'release'
+
+cwd = os.getcwd()
+googletest_build_dir = os.path.join(cwd, \
+                                    'third_party/googletest/googletest/build')
+googletest_include_dir = os.path.join(cwd, \
+                                      'third_party/googletest/googletest/include')
 doxygen_dir = 'build/doxygen'
 
-# helper functions
+# set our required libraries
+libraries = ['-lpthread']
+library_paths = ''
+cxx = 'clang++'
+cpp_defines = {}
+cxx_flags = ['-std=c++14', '-Weverything', '-Wno-c++11-extensions',
+             '-Wno-c++98-compat', '-Wno-padded', '-pthread']
+debug_flags = ['-O0', '-g']
+release_flags = ['-O2']
+release_with_debug_info_flags = ['-O2', '-g']
 
 
 @contextlib.contextmanager
@@ -19,35 +34,30 @@ def temp_chdir(path):
     finally:
         os.chdir(starting_directory)
 
-# build required libraries
 
-try:
-    os.mkdir(googletest_build_dir)
-except OSError as e:
-    print('the %s directory is exist.' % googletest_build_dir)
+AddOption('--doc', dest='doc', action='store_true', default=False)
+AddOption('--dep', '--dependency', dest='dependency', action='store_true', \
+          default=False)
+AddOption('--build_target', dest='target', action='store', default=DEBUG)
 
-with temp_chdir(googletest_build_dir):
-    subprocess.call(['cmake', '..'])
-    subprocess.call(['make', '-j', '4'])
+is_build_doc = GetOption('doc')
+is_build_dependency = GetOption('dependency')
+build_target = GetOption('target')
 
-# generate doc
+if is_build_doc:
+    subprocess.call(['doxygen', 'Doxyfile'])
+    exit(0)
 
-subprocess.call(['doxygen', 'Doxyfile'])
+if is_build_dependency:
+    try:
+        os.mkdir(googletest_build_dir)
+    except OSError as e:
+        print('the %s directory is exist.' % googletest_build_dir)
 
-# set our required libraries
-DEBUG = 'debug'
-RELEASE = 'release'
-DEFAULT_TARGET = DEBUG
-
-libraries = ['-lpthread']
-library_paths = ''
-cxx = 'clang++'
-cpp_defines = {}
-cxx_flags = ['-std=c++14', '-Weverything', '-Wno-c++11-extensions',
-             '-Wno-c++98-compat', '-Wno-padded', '-pthread']
-debug_flags = ['-O0', '-g']
-release_flags = ['-O2']
-release_with_debug_info_flags = ['-O2', '-g']
+    with temp_chdir(googletest_build_dir):
+        subprocess.call(['cmake', '..'])
+        subprocess.call(['make', '-j', '4'])
+    exit(0)
 
 # define the attributes of the build environment shared between
 # both the debug and release builds
@@ -56,26 +66,17 @@ common_env.Append(LIBS=libraries)
 common_env.Append(LIBPATH=library_paths)
 common_env.Append(CPPDEFINES=cpp_defines)
 common_env.Append(CXXFLAGS=cxx_flags)
-common_env['ENV']['TERM'] = os.environ['TERM']
+common_env.Append(ENV={'TERM': os.environ['TERM']})
 
-# release build is derived from the common build environment...
-release_env = common_env.Clone()
-release_env.Append(CPPDEFINES=['RELEASE'])
-release_env.Append(CXXFLAGS=release_flags)
-release_env.VariantDir('build/release/src', 'src', duplicate=0)
-release_env.VariantDir('build/release/test', 'test', duplicate=0)
+if build_target == DEBUG:
 
-# define debug build environment in a similar fashion...
-debug_env = common_env.Clone()
-debug_env.Append(CPPDEFINES=['DEBUG'])
-debug_env.Append(CXXFLAGS=debug_flags)
-debug_env.VariantDir('build/debug/src', 'src', duplicate=0)
-debug_env.VariantDir('build/debug/test', 'test', duplicate=0)
+    #  define debug build environment in a similar fashion...
+    debug_env = common_env.Clone()
+    debug_env.Append(CPPDEFINES=['DEBUG'])
+    debug_env.Append(CXXFLAGS=debug_flags)
+    debug_env.VariantDir('build/debug/src', 'src', duplicate=0)
+    debug_env.VariantDir('build/debug/test', 'test', duplicate=0)
 
-target = ARGUMENTS.get('target', DEFAULT_TARGET)
-print('target: %s' % target)
-
-if target == DEBUG:
     mode_dir = 'build/debug'
     env = debug_env
     env.SConscript('%s/src/sconscript' % mode_dir, {'env': env})
@@ -87,7 +88,15 @@ if target == DEBUG:
 
     env.SConscript('%s/test/sconscript' % mode_dir, {'env': test_debug_env})
 
-elif target == RELEASE:
+if build_target == RELEASE:
+
+    #  release build is derived from the common build environment...
+    release_env = common_env.Clone()
+    release_env.Append(CPPDEFINES=['RELEASE'])
+    release_env.Append(CXXFLAGS=release_flags)
+    release_env.VariantDir('build/release/src', 'src', duplicate=0)
+    release_env.VariantDir('build/release/test', 'test', duplicate=0)
+
     mode_dir = 'build/release'
     env = release_env
     env.SConscript('%s/src/sconscript' % mode_dir, {'env': env})
@@ -99,11 +108,10 @@ elif target == RELEASE:
 
     env.SConscript('%s/test/sconscript' % mode_dir, {'env': env})
 
-# clean
-
 if env.GetOption('clean'):
     # clean for google test lib
     subprocess.call(['rm', '-rf', googletest_build_dir])
 
     # clean for doxygen html
     subprocess.call(['rm', '-rf', doxygen_dir])
+

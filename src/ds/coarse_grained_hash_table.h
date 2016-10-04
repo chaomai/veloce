@@ -61,7 +61,7 @@ class CoarseGrainedHashTable {
   using hasher = Hash;
   using key_equal = KeyEqual;
 
-  CoarseGrainedHashTable(size_type slots_size = 524288);
+  CoarseGrainedHashTable(size_type slots_size = 1048576);
   CoarseGrainedHashTable(std::initializer_list<value_type> init);
   CoarseGrainedHashTable(const CoarseGrainedHashTable &rhs) = delete;
   CoarseGrainedHashTable(CoarseGrainedHashTable &&rhs) = delete;

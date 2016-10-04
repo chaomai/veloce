@@ -94,7 +94,8 @@ void Veloce::init_handler() {
    */
   _handlers.insert("del", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count < 1) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "del"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].del(args);
 
@@ -106,7 +107,8 @@ void Veloce::init_handler() {
 
   _handlers.insert("exists", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "exists"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].exists(args);
 
@@ -120,7 +122,8 @@ void Veloce::init_handler() {
    */
   _handlers.insert("append", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "append"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].append(args);
 
@@ -137,7 +140,8 @@ void Veloce::init_handler() {
 
   _handlers.insert("get", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "get"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].get(args);
 
@@ -160,7 +164,8 @@ void Veloce::init_handler() {
 
   _handlers.insert("getset", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "getset"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].getset(args);
 
@@ -188,7 +193,8 @@ void Veloce::init_handler() {
 
   _handlers.insert("set", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "set"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].set(args);
 
@@ -202,7 +208,8 @@ void Veloce::init_handler() {
 
   _handlers.insert("setnx", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 2) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "setnx"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].setnx(args);
 
@@ -218,7 +225,8 @@ void Veloce::init_handler() {
 
   _handlers.insert("strlen", [this](const Args& args, ClientInfo& client_info) {
     if (args._command_args_count != 1) {
-      build_error_reply(client_info._out, MSG_ERR);
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "strlen"));
     } else {
       auto ret_pair = _dbs[client_info._current_db_num].strlen(args);
 
@@ -233,15 +241,29 @@ void Veloce::init_handler() {
   /*
    * list
    */
-  // llen
-  // lpop
-  // lpush
-  // lpushx
-  // lrem
-  // lset
-  // rpop
-  // rpush
-  // rpushx
+  _handlers.insert("llen", [this](const Args& args, ClientInfo& client_info) {
+    if (args._command_args_count != 1) {
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "llen"));
+    } else {
+    }
+  });
+
+  _handlers.insert("lpop", [this](const Args& args, ClientInfo& client_info) {
+    if (args._command_args_count != 1) {
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "lpop"));
+    } else {
+    }
+  });
+
+  _handlers.insert("lpush", [this](const Args& args, ClientInfo& client_info) {
+    if (args._command_args_count != 2) {
+      build_error_reply(client_info._out, MSG_ERR,
+                        string_format(MSG_ERR_ARG_NUM, "lpush"));
+    } else {
+    }
+  });
 }
 
 void Veloce::build_status_reply(std::string& out, const std::string& str) {

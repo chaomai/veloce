@@ -15,7 +15,7 @@ This project is a practice about Linux programming (first step).
 
 And I will combine lock-free, distribute system and other knowledge to archive high performance (second step).
 
-# Installation
+# Build and Run
 
 ```bash
 scons

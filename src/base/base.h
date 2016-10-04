@@ -17,7 +17,13 @@ struct Args {
   std::vector<std::string> _command_args;
 };
 
-enum ItemType { VELOCE_INT, VELOCE_DOUBLE, VELOCE_DICT, VELOCE_LIST, VELOCE_STRING };
+enum ItemType {
+  VELOCE_INT,
+  VELOCE_DOUBLE,
+  VELOCE_DICT,
+  VELOCE_LIST,
+  VELOCE_STRING
+};
 
 struct Item {
   ItemType _type;

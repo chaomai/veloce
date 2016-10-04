@@ -2,3 +2,4 @@ build/
 tags
 *.pyc
 .sconsign.dblite
+compile_commands.json

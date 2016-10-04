@@ -1,6 +1,7 @@
 #ifndef VELOCE_SERVER_DB_H_
 #define VELOCE_SERVER_DB_H_
 
+#include <initializer_list>
 #include <utility>
 
 #include "base/base.h"
@@ -34,11 +35,14 @@ class Db {
   std::pair<int, State> strlen(const Args& args);
 
   /*
-   * list
+   * hash table
    */
-  std::pair<int, State> llen(const Args& args);
 
  private:
+  Item* get_raw(const Args& args);
+  State check_type(Item* item,
+                   const std::initializer_list<ItemType>& valid_types);
+
   ds::Dict _dict;
 };
 

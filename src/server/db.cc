@@ -5,10 +5,13 @@
 #include <utility>
 
 #include "base/base.h"
+#include "ds/list.h"
 
 using std::atomic_int;
 using std::string;
 using std::pair;
+
+using ds::List;
 
 /*
  * keys
@@ -69,21 +72,13 @@ pair<int, Db::State> Db::append(const Args& args) {
 }
 
 pair<Item*, Db::State> Db::get(const Args& args) {
-  const string& key = args._command_args[0];
-  Item* item = _dict.get(key);
+  Item* item = get_raw(args);
 
-  if (item != nullptr) {
-    switch (item->_type) {
-      case VELOCE_INT:
-      case VELOCE_DOUBLE:
-      case VELOCE_STRING: {
-        return {item, State::OK};
-      }
-
-      default: { return {nullptr, State::TYPE_ERROR}; }
-    }
-  } else {
+  if (check_type(item, {VELOCE_INT, VELOCE_DOUBLE, VELOCE_STRING}) ==
+      State::OK) {
     return {item, State::OK};
+  } else {
+    return {nullptr, State::TYPE_ERROR};
   }
 }
 
@@ -177,4 +172,47 @@ pair<int, Db::State> Db::strlen(const Args& args) {
   } else {
     return {0, State::OK};
   }
+}
+
+/*
+ * list
+ */
+std::pair<int, Db::State> Db::llen(const Args& args) {}
+
+std::pair<Item*, Db::State> Db::lpop(const Args& args) {}
+
+std::pair<int, Db::State> Db::lpush(const Args& args) {
+  Item* item = get_raw(args);
+
+  if (check_type(item, {VELOCE_LIST}) != State::OK) {
+    return {0, State::TYPE_ERROR};
+  }
+
+  const string& key = args._command_args[0];
+
+  if (item == nullptr) {
+    List<Item*>* value = new List<Item*>;
+    item = new Item({VELOCE_LIST, value});
+  }
+}
+
+Item* Db::get_raw(const Args& args) {
+  const string& key = args._command_args[0];
+  Item* item = _dict.get(key);
+  return item;
+}
+
+Db::State Db::check_type(Item* item,
+                         const std::initializer_list<ItemType>& valid_types) {
+  if (item == nullptr) {
+    return State::OK;
+  }
+
+  for (auto iter = valid_types.begin(); iter != valid_types.end(); ++iter) {
+    if (item->_type == *iter) {
+      return State::OK;
+    }
+  }
+
+  return State::TYPE_ERROR;
 }
